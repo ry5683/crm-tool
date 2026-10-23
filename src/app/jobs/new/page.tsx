@@ -24,9 +24,15 @@ type Member = {
 export const instant = false;
 
 // The page itself. It's built on the server, before anything gets to your browser.
-export default async function NewJobPage() {
+// The web address can end in ?customer=ID, which pre-picks that customer (used by the "+ New job" button on a customer's page).
+export default async function NewJobPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ customer?: string }>;
+}) {
   // Wait until someone's actually visiting, so we show fresh info.
   await connection();
+  const { customer: preselectedCustomerId } = await searchParams;
   // Are you signed in? If not, we send you to the login page, because we don't want strangers poking around.
   const supabase = await createClient();
   const { data: claims, error: claimsError } = await supabase.auth.getClaims();
@@ -110,6 +116,11 @@ export default async function NewJobPage() {
         <JobForm
           action={createJob}
           customers={customerData as Customer[]}
+          defaultCustomerId={
+            (customerData as Customer[]).some((c) => c.id === preselectedCustomerId)
+              ? preselectedCustomerId
+              : undefined
+          }
           technicians={(memberData as Member[]).map((member) => ({
             userId: member.user_id,
           }))}

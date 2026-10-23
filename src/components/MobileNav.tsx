@@ -17,6 +17,12 @@ const tabs = [
     icon: "M4 6h16M4 12h16M4 18h10",
   },
   {
+    href: "/customers",
+    label: "Customers",
+    match: (path: string) => path.startsWith("/customers"),
+    icon: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8",
+  },
+  {
     href: "/jobs/new",
     label: "New job",
     match: (path: string) => path === "/jobs/new",
@@ -73,11 +79,11 @@ export default function MobileNav() {
         aria-label="Main menu"
         className="no-print fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
       >
-        <ul className="relative mx-auto grid max-w-md grid-cols-4">
-          {/* A little blue bar that slides over to whichever tab you're on. Each tab is a quarter of the width. */}
+        <ul className="relative mx-auto grid max-w-md grid-cols-5">
+          {/* A little blue bar that slides over to whichever tab you're on. Each tab is a fifth of the width. */}
           <li
             aria-hidden="true"
-            className="pointer-events-none absolute left-0 top-0 h-0.5 w-1/4 transition-transform duration-300 ease-out"
+            className="pointer-events-none absolute left-0 top-0 h-0.5 w-1/5 transition-transform duration-300 ease-out"
             style={{
               transform: `translateX(${Math.max(tabs.findIndex((tab) => tab.match(pathname)), 0) * 100}%)`,
               opacity: tabs.some((tab) => tab.match(pathname)) ? 1 : 0,

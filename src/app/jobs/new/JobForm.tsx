@@ -58,6 +58,7 @@ export default function JobForm({
   customers,
   technicians,
   initial,
+  defaultCustomerId,
 }: {
   action: (
     previousState: CreateJobState,
@@ -66,12 +67,13 @@ export default function JobForm({
   customers: CustomerOption[];
   technicians: TechnicianOption[];
   initial?: InitialJob;
+  defaultCustomerId?: string;
 }) {
   // Are we editing an existing job or making a new one? We also track the save result and whether a save is in progress.
   const isEditing = initial !== undefined;
   const [state, formAction, isPending] = useActionState(action, initialState);
   const [customerId, setCustomerId] = useState(
-    initial?.customerId ?? customers[0]?.id ?? "__new__",
+    initial?.customerId ?? defaultCustomerId ?? customers[0]?.id ?? "__new__",
   );
   // The form's memory of your estimate lines. A new job starts with one blank line; editing starts with the saved ones.
   const [lines, setLines] = useState<DraftLine[]>(
