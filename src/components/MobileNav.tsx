@@ -35,6 +35,12 @@ const tabs = [
     icon: "M12 3v18M16 7.5c0-1.4-1.8-2.5-4-2.5s-4 1.1-4 2.5 1.8 2.5 4 2.5 4 1.1 4 2.5-1.8 2.5-4 2.5-4-1.1-4-2.5",
   },
   {
+    href: "/invoices",
+    label: "Invoices",
+    match: (path: string) => path.startsWith("/invoices"),
+    icon: "M6 2h9l5 5v15H6zM14 2v6h6M9 13h8M9 17h8",
+  },
+  {
     href: "/team",
     label: "Team",
     match: (path: string) => path.startsWith("/team"),
@@ -85,11 +91,11 @@ export default function MobileNav() {
         aria-label="Main menu"
         className="no-print fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
       >
-        <ul className="relative mx-auto grid max-w-md grid-cols-6">
-          {/* A little blue bar that slides over to whichever tab you're on. Each tab is a sixth of the width. */}
+        <ul className="relative mx-auto grid max-w-md grid-cols-7">
+          {/* A little blue bar that slides over to whichever tab you're on. Each tab is a seventh of the width. */}
           <li
             aria-hidden="true"
-            className="pointer-events-none absolute left-0 top-0 h-0.5 w-1/6 transition-transform duration-300 ease-out"
+            className="pointer-events-none absolute left-0 top-0 h-0.5 w-1/7 transition-transform duration-300 ease-out"
             style={{
               transform: `translateX(${Math.max(tabs.findIndex((tab) => tab.match(pathname)), 0) * 100}%)`,
               opacity: tabs.some((tab) => tab.match(pathname)) ? 1 : 0,
@@ -104,7 +110,7 @@ export default function MobileNav() {
                 {/* Each tab is a big tap target (at least 56px tall) so it's easy to hit with a thumb. */}
                 <Link
                   aria-current={isActive ? "page" : undefined}
-                  className={`flex min-h-14 flex-col items-center justify-center gap-1 text-[11px] font-medium ${
+                  className={`flex min-h-14 flex-col items-center justify-center gap-1 text-[10px] font-medium ${
                     isActive ? "text-blue-700" : "text-zinc-500 active:text-zinc-900"
                   }`}
                   href={tab.href}
@@ -122,7 +128,7 @@ export default function MobileNav() {
           <li>
             <form action={signOut}>
               <button
-                className="flex min-h-14 w-full flex-col items-center justify-center gap-1 text-[11px] font-medium text-zinc-500 active:text-zinc-900"
+                className="flex min-h-14 w-full flex-col items-center justify-center gap-1 text-[10px] font-medium text-zinc-500 active:text-zinc-900"
                 type="submit"
               >
                 <Icon d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />

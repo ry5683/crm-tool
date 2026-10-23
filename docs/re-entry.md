@@ -85,3 +85,9 @@
 - Migration `008_team_management.sql` (`set_member_role`, `remove_team_member`) must be applied in Supabase before changing roles or removing people. Migrations 006 and 007 are still pending as well.
 - Real invite emails need a verified Resend sender domain (same limit as approval emails).
 - Remaining build order the user chose: Invoices list, Sign up and onboarding, Schedule, Dashboard, Settings.
+
+## Invoices list
+
+- `/invoices`: totals (Outstanding, Overdue, Paid), filter chips, and a row per job with a billable total (estimate + approved changes). Owners get "Mark paid" / "Undo".
+- Migration `009_invoice_payments.sql` adds `jobs.paid_at`; must be applied or the page errors. Overdue = unpaid and job older than 30 days (`src/lib/invoices.ts`).
+- Mobile nav now has 7 slots (6 tabs + sign out) at 10px labels; check on a real phone.

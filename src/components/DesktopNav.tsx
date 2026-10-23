@@ -20,6 +20,7 @@ const tabs = [
   { href: "/customers", label: "Customers", match: (path: string) => path.startsWith("/customers") },
   { href: "/jobs/new", label: "New job", match: (path: string) => path === "/jobs/new" },
   { href: "/pricebook", label: "Pricebook", match: (path: string) => path.startsWith("/pricebook") },
+  { href: "/invoices", label: "Invoices", match: (path: string) => path.startsWith("/invoices"), },
   { href: "/team", label: "Team", match: (path: string) => path.startsWith("/team") },
 ];
 
