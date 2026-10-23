@@ -1,10 +1,16 @@
+/* The app-wide look and feel. (CSS is the set of style rules for colors, fonts and spacing, and this file applies to every page.)
+   The print rules at the bottom keep printed paperwork looking clean. */
+
+/* Loads Tailwind, a toolkit of ready-made style words that the pages use in their className text. */
 @import "tailwindcss";
 
+/* Basic colors for light mode: white background, near-black text. */
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
 
+/* Tells Tailwind about our color and font choices so they can be used by name. */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -12,6 +18,7 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* If the visitor's device is in dark mode, switch to a near-black background and light text. */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -19,8 +26,61 @@
   }
 }
 
+/* Apply those colors and a plain Arial-style font to the whole page. */
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* iPhones (Safari) zoom the whole page in when you tap a box whose text is smaller than 16px, which is annoying.
+   So on phones we keep every form field at 16px, even if it sits inside smaller label text. */
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Rules that only kick in when printing (or saving as a PDF). */
+@media print {
+  /* Paper size and margins: US Letter with 0.6-inch margins. */
+  @page {
+    size: letter;
+    margin: 0.6in;
+  }
+
+  /* On paper, use a plain white background and black text, but still print any background colors we've used on purpose. */
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-family: Arial, Helvetica, sans-serif;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Anything marked "no-print" (buttons, navigation) disappears on paper. */
+  .no-print {
+    display: none !important;
+  }
+
+  /* The printable document uses the full page width in black text. */
+  .invoice-document {
+    width: 100%;
+    max-width: none;
+    color: #000 !important;
+  }
+
+  /* Try not to split sections, tables or rows across two pages. */
+  .invoice-document section,
+  .invoice-document article,
+  .invoice-document header,
+  .invoice-document footer,
+  .invoice-document table,
+  .invoice-document tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 }
