@@ -2,11 +2,12 @@
 // From here you can open a job, edit it, delete it (owners only), start a new one, or sign out.
 
 // Borrowed tools: our login/database connection (Supabase), money helpers, page redirects, links, plus our own sign-out and delete pieces.
+import Brand from "@/components/Brand";
 import { createClient } from "@/lib/supabase/server";
 import { formatCents, totalCents } from "@/lib/money";
+import type { CSSProperties } from "react";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
-import { signOut } from "./actions";
 import Link from "next/link";
 import DeleteJobButton from "./[id]/DeleteJobButton";
 
@@ -140,60 +141,59 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
 
   // Now we draw the page.
   return (
-    <main className="min-h-screen bg-zinc-50 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="animate-rise min-h-screen bg-zinc-50 px-4 py-8 sm:px-6 lg:px-8">
       {/* A centered column that holds everything. */}
       <div className="mx-auto max-w-3xl">
         {/* The top of the page: title on the left, buttons on the right. */}
         <header className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">
-              Change Orders
-            </p>
+            <div className="md:hidden">
+              <Brand />
+            </div>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
               Jobs
             </h1>
           </div>
-          <div className="hidden items-center gap-2 md:flex">
-            {/* Button to your price book. */}
+          <div className="hidden md:block">
+            {/* Button to make a new job. (The rest of the menu lives in the top bar.) */}
             <Link
-              className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
-              href="/pricebook"
-            >
-              Pricebook
-            </Link>
-            {/* Button to make a new job. */}
-            <Link
-              className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800"
+              className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-800"
               href="/jobs/new"
             >
-              New job
+              + New job
             </Link>
-            {/* The Sign out button. Pressing it runs that sign-out function from the top. */}
-            <form action={signOut}>
-              <button
-                className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
-                type="submit"
-              >
-                Sign out
-              </button>
-            </form>
           </div>
         </header>
 
         {/* Here's the list of jobs. */}
-        <section className="mt-8 space-y-3" aria-label="Your jobs">
+        <section className="stagger mt-8 space-y-3" aria-label="Your jobs">
           {/* No jobs? We show a friendly message. Otherwise, one card per job. */}
           {jobRows.length === 0 ? (
-            <p className="rounded-xl border border-zinc-200 bg-white p-6 text-zinc-600">
-              {requestedJobId
-                ? "No job with that ID is available to this account."
-                : "No jobs are available for this account yet."}
-            </p>
+            <div className="animate-rise rounded-2xl border border-dashed border-zinc-300 bg-white p-10 text-center">
+              <p className="text-4xl" aria-hidden="true">🧰</p>
+              <p className="mt-3 font-semibold text-zinc-900">
+                {requestedJobId ? "Nothing here" : "No jobs yet"}
+              </p>
+              <p className="mt-1 text-sm text-zinc-600">
+                {requestedJobId
+                  ? "No job with that ID is available to this account."
+                  : "Create your first job and it will show up right here."}
+              </p>
+              {!requestedJobId && (
+                <Link
+                  className="mt-5 inline-block rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800"
+                  href="/jobs/new"
+                >
+                  Create your first job
+                </Link>
+              )}
+            </div>
           ) : (
             // This repeats once for every job, making a card each.
-            jobRows.map((job) => (
+            jobRows.map((job, index) => (
               <article
-                className="rounded-xl border border-zinc-200 bg-white shadow-sm"
+                className="lift rounded-xl border border-zinc-200 bg-white shadow-sm"
+                style={{ "--i": Math.min(index, 10) } as CSSProperties}
                 key={job.id}
               >
                 {/* The big clickable part of the card. Tap it to open the job. */}
@@ -210,8 +210,12 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                         Customer: {customerNames.get(job.customer_id) ?? "Unknown"}
                       </p>
                     </div>
-                    <p className="text-sm capitalize text-zinc-600">
-                      <span className="text-zinc-500">Status:</span> {job.status}
+                    <p className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium capitalize text-zinc-700">
+                      <span
+                        aria-hidden="true"
+                        className={`h-1.5 w-1.5 rounded-full ${job.status === "open" ? "bg-emerald-500" : "bg-zinc-400"}`}
+                      />
+                      {job.status}
                     </p>
                   </div>
                   <p className="mt-4 font-semibold text-zinc-950">

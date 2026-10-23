@@ -3,7 +3,7 @@
 
 // Borrowed tools: money math, our login/database connection (Supabase), links, "not found" and redirect helpers, some shared display pieces (the line item table and status badge) and this job's buttons.
 import { totalCents } from "@/lib/money";
-import { callHref, mapsHref, textHref } from "@/lib/contact";
+import { callHref, formatPhone, mapsHref, textHref, usPhoneDigits } from "@/lib/contact";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -184,6 +184,12 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
 
   // Label the loaded info with the shapes above. Only an owner is allowed to delete the job.
   const customer = customerData as Customer;
+  // A small "Add" link shown next to any missing detail, taking you straight to the edit page.
+  const addLink = (
+    <Link className="font-medium text-blue-700 hover:underline" href={`/jobs/${job.id}/edit`}>
+      Add
+    </Link>
+  );
   const estimateLines = lineData as EstimateLine[];
   const assignedMember = memberData as Member | null;
   const currentMember = currentMemberData as Member | null;
@@ -226,7 +232,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
 
   // Now we draw the page.
   return (
-    <main className="min-h-screen bg-zinc-50 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="animate-rise min-h-screen bg-zinc-50 px-4 py-8 sm:px-6 lg:px-8">
       {/* A centered column that holds everything. */}
       <div className="mx-auto max-w-3xl">
         {/* A link back to the jobs list. */}
@@ -297,9 +303,17 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
           </p>
         </header>
 
-        {/* The customer card: name, address, email and phone. */}
+        {/* The customer card: name, address, email and phone. Anything missing gets a quick "Add" link to the edit page. */}
         <section className="mt-5 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-zinc-950">Customer</h2>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold text-zinc-950">Customer</h2>
+            <Link
+              className="text-sm font-medium text-blue-700 hover:underline"
+              href={`/jobs/${job.id}/edit`}
+            >
+              Edit contact
+            </Link>
+          </div>
           <dl className="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
               <dt className="text-sm text-zinc-500">Name</dt>
@@ -319,7 +333,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                     {customer.address}
                   </a>
                 ) : (
-                  "No address on file"
+                  <span className="text-zinc-600">No address on file {addLink}</span>
                 )}
               </dd>
             </div>
@@ -335,7 +349,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                     {customer.email}
                   </a>
                 ) : (
-                  "No email on file"
+                  <span className="text-zinc-600">No email on file {addLink}</span>
                 )}
               </dd>
             </div>
@@ -343,9 +357,9 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
               <dt className="text-sm text-zinc-500">Phone</dt>
               <dd className="mt-1 font-medium text-zinc-950">
                 {/* Big Call and Text buttons so a thumb can reach the customer in one tap. */}
-                {customer.phone && callHref(customer.phone) ? (
+                {customer.phone && usPhoneDigits(customer.phone) && callHref(customer.phone) ? (
                   <div className="flex flex-wrap items-center gap-2">
-                    <span>{customer.phone}</span>
+                    <span className="tabular-nums">{formatPhone(customer.phone)}</span>
                     <a
                       className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800"
                       href={callHref(customer.phone) ?? undefined}
@@ -360,7 +374,10 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                     </a>
                   </div>
                 ) : (
-                  customer.phone || "No phone on file"
+                  <span className="text-zinc-600">
+                    {customer.phone ? `${customer.phone} (incomplete) ` : "No phone on file "}
+                    {addLink}
+                  </span>
                 )}
               </dd>
             </div>

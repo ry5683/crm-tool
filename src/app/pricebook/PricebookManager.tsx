@@ -4,6 +4,7 @@
 // It's a "client component," so it runs in the visitor's browser and forms respond instantly. (className text is Tailwind shorthand for looks.)
 
 // Borrowing a React helper that tracks how a form turned out, plus the add, edit and remove actions from actions.ts.
+import { FieldTag } from "@/components/FieldTag";
 import { useActionState } from "react";
 import {
   createPricebookItem,
@@ -54,7 +55,7 @@ function ItemEditor({ item }: { item: PricebookItem }) {
         <input name="id" type="hidden" value={item.id} />
         {/* The item name, already filled in. */}
         <label className="text-sm font-medium text-zinc-700">
-          Item name
+          Item name <FieldTag required />
           <input
             className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2"
             defaultValue={item.name}
@@ -65,7 +66,7 @@ function ItemEditor({ item }: { item: PricebookItem }) {
         </label>
         {/* The unit, already filled in. */}
         <label className="text-sm font-medium text-zinc-700">
-          Unit
+          Unit <FieldTag required />
           <input
             className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2"
             defaultValue={item.unit}
@@ -76,7 +77,7 @@ function ItemEditor({ item }: { item: PricebookItem }) {
         </label>
         {/* The price in dollars. Only digits with up to two decimals get through. */}
         <label className="text-sm font-medium text-zinc-700">
-          Price
+          Price <FieldTag required />
           <input
             className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2"
             defaultValue={(item.price_cents / 100).toFixed(2)}
@@ -143,7 +144,7 @@ export default function PricebookManager({
           <form action={createAction} className="mt-4 grid gap-4 sm:grid-cols-3">
             {/* The name box. */}
             <label className="text-sm font-medium text-zinc-700">
-              Name
+              Name <FieldTag required />
               <input
                 className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2"
                 maxLength={120}
@@ -154,7 +155,7 @@ export default function PricebookManager({
             </label>
             {/* The unit box. */}
             <label className="text-sm font-medium text-zinc-700">
-              Unit
+              Unit <FieldTag required />
               <input
                 className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2"
                 maxLength={24}
@@ -165,7 +166,7 @@ export default function PricebookManager({
             </label>
             {/* The price box, in dollars. */}
             <label className="text-sm font-medium text-zinc-700">
-              Unit price (dollars)
+              Unit price (dollars) <FieldTag required />
               <input
                 className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2"
                 inputMode="decimal"

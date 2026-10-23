@@ -32,3 +32,32 @@ export function textHref(phone: string): string | null {
 export function mapsHref(address: string): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address.trim())}`;
 }
+
+// Pulls the 10 digits of a US phone number out of whatever was typed, ignoring spaces, dashes, brackets and a leading 1.
+// Returns null if it isn't exactly 10 digits, so we can tell a complete number from a partial one.
+export function usPhoneDigits(phone: string): string | null {
+  const digits = phone.replace(/\D/g, "");
+  const ten = digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
+  return ten.length === 10 ? ten : null;
+}
+
+// Shows a number the standard American way: (555) 123-4567.
+// Anything that isn't a full 10-digit number is handed back untouched, so older entries are never lost.
+export function formatPhone(phone: string): string {
+  const ten = usPhoneDigits(phone);
+  return ten ? `(${ten.slice(0, 3)}) ${ten.slice(3, 6)}-${ten.slice(6)}` : phone;
+}
+
+// Formats a number while someone is still typing it: "5551" becomes "(555) 1", and so on.
+// It stops at 10 digits so nobody can type extra ones.
+export function formatPhoneAsTyped(input: string): string {
+  let digits = input.replace(/\D/g, "");
+  if (digits.length > 10 && digits.startsWith("1")) {
+    digits = digits.slice(1);
+  }
+  digits = digits.slice(0, 10);
+  if (digits.length === 0) return "";
+  if (digits.length < 4) return `(${digits}`;
+  if (digits.length < 7) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+}

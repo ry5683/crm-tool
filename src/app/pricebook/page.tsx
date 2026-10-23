@@ -2,6 +2,7 @@
 // It loads the data on the server (the computer hosting the app) and hands it to PricebookManager to show. (className text is Tailwind shorthand for looks.)
 
 // Borrowing a link, a redirect, a freshness helper, the database connection and the pricebook display.
+import Brand from "@/components/Brand";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
@@ -73,7 +74,7 @@ export default async function PricebookPage() {
 
   // Draw the page: a back link, the heading, then the pricebook.
   return (
-    <main className="min-h-screen bg-zinc-50 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="animate-rise min-h-screen bg-zinc-50 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">
         {/* A link back to the jobs list. */}
         <Link
@@ -84,9 +85,9 @@ export default async function PricebookPage() {
         </Link>
         {/* The page heading. The sentence under it depends on whether you're an owner. */}
         <header className="mt-4">
-          <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">
-            Change Orders
-          </p>
+          <div className="md:hidden">
+              <Brand />
+            </div>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
             Pricebook
           </h1>

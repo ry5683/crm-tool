@@ -53,12 +53,12 @@ set role = excluded.role;
 -- Three sample customers for each company.
 insert into public.customers (id, business_id, name, email, phone, address)
 values
-  ('20000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', 'Mia Thompson', 'mia.thompson@example.com', '555-0101', '18 Oak Street, Fresno, CA'),
-  ('20000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000001', 'Carlos Rivera', 'carlos.rivera@example.com', '555-0102', '42 Cedar Avenue, Fresno, CA'),
-  ('20000000-0000-4000-8000-000000000003', '10000000-0000-4000-8000-000000000001', 'Avery Chen', 'avery.chen@example.com', '555-0103', '7 Willow Lane, Clovis, CA'),
-  ('20000000-0000-4000-8000-000000000004', '10000000-0000-4000-8000-000000000002', 'Jordan Patel', 'jordan.patel@example.com', '555-0201', '105 Pine Road, Reno, NV'),
-  ('20000000-0000-4000-8000-000000000005', '10000000-0000-4000-8000-000000000002', 'Sam Brooks', 'sam.brooks@example.com', '555-0202', '26 River Street, Sparks, NV'),
-  ('20000000-0000-4000-8000-000000000006', '10000000-0000-4000-8000-000000000002', 'Taylor Nguyen', 'taylor.nguyen@example.com', '555-0203', '311 Summit Drive, Reno, NV')
+  ('20000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', 'Mia Thompson', 'mia.thompson@example.com', '(559) 555-0101', '18 Oak Street, Fresno, CA'),
+  ('20000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000001', 'Carlos Rivera', 'carlos.rivera@example.com', '(559) 555-0102', '42 Cedar Avenue, Fresno, CA'),
+  ('20000000-0000-4000-8000-000000000003', '10000000-0000-4000-8000-000000000001', 'Avery Chen', 'avery.chen@example.com', '(559) 555-0103', '7 Willow Lane, Clovis, CA'),
+  ('20000000-0000-4000-8000-000000000004', '10000000-0000-4000-8000-000000000002', 'Jordan Patel', 'jordan.patel@example.com', '(775) 555-0201', '105 Pine Road, Reno, NV'),
+  ('20000000-0000-4000-8000-000000000005', '10000000-0000-4000-8000-000000000002', 'Sam Brooks', 'sam.brooks@example.com', '(775) 555-0202', '26 River Street, Sparks, NV'),
+  ('20000000-0000-4000-8000-000000000006', '10000000-0000-4000-8000-000000000002', 'Taylor Nguyen', 'taylor.nguyen@example.com', '(775) 555-0203', '311 Summit Drive, Reno, NV')
 on conflict (id) do update
 set business_id = excluded.business_id,
     name = excluded.name,

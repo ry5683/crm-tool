@@ -4,6 +4,9 @@
 // It lives in your browser, so it can react as you type (like updating the estimate total). When you hit Save, it passes your answers to a "server action", a function that runs on our server, handed in as `action`.
 
 // Borrowed tools: form helpers, links, and our money helpers, which turn dollars and quantities into exact whole numbers and back.
+import { FieldTag, RequiredNote } from "@/components/FieldTag";
+import PhoneInput from "@/components/PhoneInput";
+import AnimatedMoney from "@/components/AnimatedMoney";
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import {
@@ -128,6 +131,9 @@ export default function JobForm({
       />
       {initial && <input name="jobId" type="hidden" value={initial.jobId} />}
 
+      {/* A reminder of what the red star means. */}
+      <RequiredNote />
+
       {/* Box one: the customer and job details. */}
       <section className="space-y-5 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold text-zinc-950">Customer and job</h2>
@@ -138,7 +144,7 @@ export default function JobForm({
             className="mb-2 block text-sm font-medium text-zinc-800"
             htmlFor="customerId"
           >
-            Customer
+            Customer <FieldTag required />
           </label>
           <select
             className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5"
@@ -164,7 +170,7 @@ export default function JobForm({
                 className="mb-2 block text-sm font-medium text-zinc-800"
                 htmlFor="customerName"
               >
-                Customer name
+                Customer name <FieldTag required />
               </label>
               <input
                 className="w-full rounded-lg border border-zinc-300 px-3 py-2.5"
@@ -179,13 +185,14 @@ export default function JobForm({
                 className="mb-2 block text-sm font-medium text-zinc-800"
                 htmlFor="customerAddress"
               >
-                Address <span className="font-normal text-zinc-500">(optional)</span>
+                Address <FieldTag required />
               </label>
               <input
                 className="w-full rounded-lg border border-zinc-300 px-3 py-2.5"
                 defaultValue={selectedCustomer.address ?? ""}
                 id="customerAddress"
                 name="customerAddress"
+                required
               />
             </div>
             <div>
@@ -193,13 +200,14 @@ export default function JobForm({
                 className="mb-2 block text-sm font-medium text-zinc-800"
                 htmlFor="customerEmail"
               >
-                Email <span className="font-normal text-zinc-500">(needed to send approvals)</span>
+                Email <FieldTag hint="used to send approvals" required />
               </label>
               <input
                 className="w-full rounded-lg border border-zinc-300 px-3 py-2.5"
                 defaultValue={selectedCustomer.email ?? ""}
                 id="customerEmail"
                 name="customerEmail"
+                required
                 type="email"
               />
             </div>
@@ -208,15 +216,9 @@ export default function JobForm({
                 className="mb-2 block text-sm font-medium text-zinc-800"
                 htmlFor="customerPhone"
               >
-                Phone <span className="font-normal text-zinc-500">(optional)</span>
+                Phone <FieldTag hint="(555) 123-4567" required />
               </label>
-              <input
-                className="w-full rounded-lg border border-zinc-300 px-3 py-2.5"
-                defaultValue={selectedCustomer.phone ?? ""}
-                id="customerPhone"
-                name="customerPhone"
-                type="tel"
-              />
+              <PhoneInput defaultValue={selectedCustomer.phone} />
             </div>
           </div>
         )}
@@ -229,7 +231,7 @@ export default function JobForm({
                 className="mb-2 block text-sm font-medium text-zinc-800"
                 htmlFor="customerName"
               >
-                Customer name
+                Customer name <FieldTag required />
               </label>
               <input
                 className="w-full rounded-lg border border-zinc-300 px-3 py-2.5"
@@ -243,12 +245,13 @@ export default function JobForm({
                 className="mb-2 block text-sm font-medium text-zinc-800"
                 htmlFor="customerAddress"
               >
-                Address <span className="font-normal text-zinc-500">(optional)</span>
+                Address <FieldTag required />
               </label>
               <input
                 className="w-full rounded-lg border border-zinc-300 px-3 py-2.5"
                 id="customerAddress"
                 name="customerAddress"
+                required
               />
             </div>
             {/* Email. */}
@@ -257,12 +260,13 @@ export default function JobForm({
                 className="mb-2 block text-sm font-medium text-zinc-800"
                 htmlFor="customerEmail"
               >
-                Email <span className="font-normal text-zinc-500">(optional)</span>
+                Email <FieldTag hint="used to send approvals" required />
               </label>
               <input
                 className="w-full rounded-lg border border-zinc-300 px-3 py-2.5"
                 id="customerEmail"
                 name="customerEmail"
+                required
                 type="email"
               />
             </div>
@@ -272,14 +276,9 @@ export default function JobForm({
                 className="mb-2 block text-sm font-medium text-zinc-800"
                 htmlFor="customerPhone"
               >
-                Phone <span className="font-normal text-zinc-500">(optional)</span>
+                Phone <FieldTag hint="(555) 123-4567" required />
               </label>
-              <input
-                className="w-full rounded-lg border border-zinc-300 px-3 py-2.5"
-                id="customerPhone"
-                name="customerPhone"
-                type="tel"
-              />
+              <PhoneInput />
             </div>
           </div>
         )}
@@ -290,7 +289,7 @@ export default function JobForm({
             className="mb-2 block text-sm font-medium text-zinc-800"
             htmlFor="description"
           >
-            Job description
+            Job description <FieldTag required />
           </label>
           <textarea
             className="w-full rounded-lg border border-zinc-300 px-3 py-2.5"
@@ -308,8 +307,7 @@ export default function JobForm({
             className="mb-2 block text-sm font-medium text-zinc-800"
             htmlFor="assignedTechId"
           >
-            Assign a technician{" "}
-            <span className="font-normal text-zinc-500">(optional)</span>
+            Assign a technician <FieldTag />
           </label>
           <select
             className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5"
@@ -350,7 +348,7 @@ export default function JobForm({
                 className="mb-2 block text-sm font-medium text-zinc-800"
                 htmlFor={`line-description-${line.key}`}
               >
-                Description
+                Description <FieldTag required />
               </label>
               <input
                 className="w-full rounded-lg border border-zinc-300 px-3 py-2.5"
@@ -369,7 +367,7 @@ export default function JobForm({
                   className="mb-2 block text-sm font-medium text-zinc-800"
                   htmlFor={`line-quantity-${line.key}`}
                 >
-                  Quantity
+                  Quantity <FieldTag required />
                 </label>
                 <input
                   className="w-full rounded-lg border border-zinc-300 px-3 py-2.5"
@@ -392,7 +390,7 @@ export default function JobForm({
                   className="mb-2 block text-sm font-medium text-zinc-800"
                   htmlFor={`line-price-${line.key}`}
                 >
-                  Unit price (dollars)
+                  Unit price (dollars) <FieldTag required />
                 </label>
                 <input
                   className="w-full rounded-lg border border-zinc-300 px-3 py-2.5"
@@ -460,7 +458,7 @@ export default function JobForm({
         {/* The estimate total, adding up every line. */}
         <div className="flex justify-between border-t border-zinc-200 pt-4 text-lg font-semibold">
           <span>Estimate total</span>
-          <span>{totalOverflow ? "Over supported limit" : formatCents(runningTotal)}</span>
+          <span>{totalOverflow ? "Over supported limit" : <AnimatedMoney cents={runningTotal} />}</span>
         </div>
         {/* A warning if the total's too big to calculate safely. */}
         {totalOverflow && (

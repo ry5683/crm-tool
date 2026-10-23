@@ -73,7 +73,18 @@ export default function MobileNav() {
         aria-label="Main menu"
         className="no-print fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
       >
-        <ul className="mx-auto grid max-w-md grid-cols-4">
+        <ul className="relative mx-auto grid max-w-md grid-cols-4">
+          {/* A little blue bar that slides over to whichever tab you're on. Each tab is a quarter of the width. */}
+          <li
+            aria-hidden="true"
+            className="pointer-events-none absolute left-0 top-0 h-0.5 w-1/4 transition-transform duration-300 ease-out"
+            style={{
+              transform: `translateX(${Math.max(tabs.findIndex((tab) => tab.match(pathname)), 0) * 100}%)`,
+              opacity: tabs.some((tab) => tab.match(pathname)) ? 1 : 0,
+            }}
+          >
+            <span className="mx-auto block h-full w-8 rounded-full bg-blue-600" />
+          </li>
           {tabs.map((tab) => {
             const isActive = tab.match(pathname);
             return (
@@ -86,7 +97,9 @@ export default function MobileNav() {
                   }`}
                   href={tab.href}
                 >
-                  <Icon d={tab.icon} />
+                  <span className={`transition-transform duration-200 ${isActive ? "-translate-y-0.5 scale-110" : ""}`}>
+                    <Icon d={tab.icon} />
+                  </span>
                   {tab.label}
                 </Link>
               </li>

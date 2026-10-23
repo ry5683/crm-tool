@@ -5,6 +5,7 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense, type ReactNode } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
+import DesktopNav from "@/components/DesktopNav";
 import MobileNav from "@/components/MobileNav";
 import "./globals.css";
 
@@ -22,8 +23,8 @@ const geistMono = Geist_Mono({
 
 // What shows on the browser tab and in search results.
 export const metadata: Metadata = {
-  title: "Change Orders",
-  description: "Field-to-cash change orders for plumbers",
+  title: { default: "Tinkr", template: "%s · Tinkr" },
+  description: "Tinkr: change orders, approvals and invoices for the trades",
 };
 
 // How the page fits a phone screen. "cover" lets the page use the full screen on iPhones with a notch,
@@ -45,6 +46,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        {/* The top menu for laptops. It hides itself on phones, the sign-in page and customer pages. */}
+        <Suspense fallback={null}>
+          <DesktopNav />
+        </Suspense>
         {children}
         {/* The phone menu bar sits after the page. It hides itself on the sign-in and customer pages. */}
         <Suspense fallback={null}>

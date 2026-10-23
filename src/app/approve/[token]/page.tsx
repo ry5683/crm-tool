@@ -2,6 +2,7 @@
 // It pulls up the change order, or explains why the link won't work. (className text like "rounded-xl bg-white" is Tailwind shorthand for looks.)
 
 // Borrowing the line-item table, the money math, the link-code helpers, the database connection and the Approve/Decline form.
+import Brand from "@/components/Brand";
 import LineItems from "@/components/LineItems";
 import { totalCents } from "@/lib/money";
 import { hashApprovalToken, isValidApprovalToken } from "@/lib/approval-token";
@@ -63,9 +64,10 @@ export default async function ApprovalPage({ params }: ApprovalPageProps) {
   if (!isValidApprovalToken(token)) {
     // Draw the "link unavailable" card.
     return (
-      <main className="min-h-screen bg-zinc-50 px-4 py-12">
+      <main className="animate-rise min-h-screen bg-zinc-50 px-4 py-12">
         <section className="mx-auto max-w-2xl rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">
+          <Brand />
+          <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-blue-700">
             Change-order approval
           </p>
           <h1 className="mt-2 text-2xl font-semibold text-zinc-950">
@@ -94,9 +96,10 @@ export default async function ApprovalPage({ params }: ApprovalPageProps) {
       approval && approval.status !== "valid" ? approval.status : "invalid";
     // Draw the "link unavailable" card with the specific reason.
     return (
-      <main className="min-h-screen bg-zinc-50 px-4 py-12">
+      <main className="animate-rise min-h-screen bg-zinc-50 px-4 py-12">
         <section className="mx-auto max-w-2xl rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">
+          <Brand />
+          <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-blue-700">
             Change-order approval
           </p>
           <h1 className="mt-2 text-2xl font-semibold text-zinc-950">
@@ -133,10 +136,11 @@ export default async function ApprovalPage({ params }: ApprovalPageProps) {
 
   // Everything checks out, so draw the full approval page: business, reason, work and total, then the decision form.
   return (
-    <main className="min-h-screen bg-zinc-50 px-4 py-12">
+    <main className="animate-rise min-h-screen bg-zinc-50 px-4 py-12">
       <article className="mx-auto max-w-2xl rounded-xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
         {/* A small label across the top. */}
-        <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">
+        <Brand />
+          <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-blue-700">
           Change-order approval
         </p>
         {/* The business name as the big title. */}

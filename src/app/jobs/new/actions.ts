@@ -12,30 +12,22 @@ export type CreateJobState = {
   error: string | null;
 };
 
-// The rules for a new customer: a name is a must, while email, phone and address are optional. Blanks count as "not given", and an email has to look like an email.
+// The rules for a new customer: a name is a must, while email, phone and address are all required, and the phone must look like (555) 123-4567.
 const customerInputSchema = z.object({
   name: z.string().trim().min(1, "Customer name is required."),
-  email: z.preprocess(
-    (value) =>
-      typeof value === "string" && value.trim() !== ""
-        ? value.trim()
-        : undefined,
-    z.email().optional(),
-  ),
-  phone: z.preprocess(
-    (value) =>
-      typeof value === "string" && value.trim() !== ""
-        ? value.trim()
-        : undefined,
-    z.string().optional(),
-  ),
-  address: z.preprocess(
-    (value) =>
-      typeof value === "string" && value.trim() !== ""
-        ? value.trim()
-        : undefined,
-    z.string().optional(),
-  ),
+  // Email, phone and address are all required so every customer can be reached and found.
+  email: z
+    .string()
+    .trim()
+    .min(1, "Customer email is required.")
+    .pipe(z.email("Enter a valid email address.")),
+  // The phone must be exactly (xxx) xxx-xxxx, with nothing else accepted.
+  phone: z
+    .string()
+    .trim()
+    .min(1, "Customer phone is required.")
+    .regex(/^\(\d{3}\) \d{3}-\d{4}$/, "Phone must be in this format: (555) 123-4567."),
+  address: z.string().trim().min(1, "Customer address is required."),
 });
 
 // The rules for the job: a description, and at least one estimate line with a description, a whole-number quantity and a price in cents.
@@ -106,9 +98,9 @@ export async function createJob(
   if (isNewCustomer) {
     const customerResult = customerInputSchema.safeParse({
       name: formData.get("customerName"),
-      email: formData.get("customerEmail"),
-      phone: formData.get("customerPhone"),
-      address: formData.get("customerAddress"),
+      email: formData.get("customerEmail") ?? "",
+      phone: formData.get("customerPhone") ?? "",
+      address: formData.get("customerAddress") ?? "",
     });
 
     if (!customerResult.success) {

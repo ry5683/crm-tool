@@ -2,6 +2,8 @@
 // (className text like "rounded-lg bg-blue-700" is Tailwind shorthand for how things look.)
 
 // The sign-in action that fires when the form is submitted.
+import { FieldTag } from "@/components/FieldTag";
+import Brand from "@/components/Brand";
 import { signIn } from "./actions";
 
 // After a failed sign-in, the web address carries an "error" note, and this page can read it.
@@ -19,18 +21,16 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   // Draw the page: a centered card with a heading, a spot for errors, and the sign-in form.
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 py-12">
+    <main className="animate-rise flex min-h-screen items-center justify-center bg-zinc-50 px-4 py-12">
       {/* The white card in the middle of the screen. */}
       <section className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
         {/* The app name, the heading, and a short instruction. */}
-        <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">
-          Change Orders
-        </p>
+        <Brand />
         <h1 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-950">
           Sign in
         </h1>
         <p className="mt-2 text-sm leading-6 text-zinc-600">
-          Sign in with one of your plumbing company test accounts.
+          Sign in with one of your test accounts.
         </p>
 
         {/* A red notice that only shows up after a failed sign-in. */}
@@ -51,7 +51,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               className="mb-2 block text-sm font-medium text-zinc-800"
               htmlFor="email"
             >
-              Email
+              Email <FieldTag required />
             </label>
             <input
               autoComplete="email"
@@ -69,7 +69,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               className="mb-2 block text-sm font-medium text-zinc-800"
               htmlFor="password"
             >
-              Password
+              Password <FieldTag required />
             </label>
             <input
               autoComplete="current-password"

@@ -4,6 +4,7 @@
 // It lives in your browser so it updates as you type. Pressing Save hands it to the server code in actions.ts.
 
 // Borrowed tools: links, form helpers, our money helpers, and the save function.
+import { FieldTag, RequiredNote } from "@/components/FieldTag";
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import {
@@ -110,6 +111,9 @@ export default function ChangeOrderForm({
       <input name="jobId" type="hidden" value={jobId} />
       <input name="lines" type="hidden" value={JSON.stringify(serializedLines)} />
 
+      {/* A reminder of what the red star means. */}
+      <RequiredNote />
+
       {/* The box that holds the reason and the lines. */}
       <section className="space-y-5 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
         {/* Why is this extra work needed? Be honest with the customer here. */}
@@ -118,7 +122,7 @@ export default function ChangeOrderForm({
             className="block text-sm font-medium text-zinc-800"
             htmlFor="reason"
           >
-            Why is this extra work needed?
+            Why is this extra work needed? <FieldTag required />
           </label>
           <textarea
             className="mt-2 w-full rounded-lg border border-zinc-300 px-3 py-2.5"
@@ -156,7 +160,7 @@ export default function ChangeOrderForm({
                 className="block text-sm font-medium text-zinc-800"
                 htmlFor={`pricebook-item-${line.key}`}
               >
-                Pricebook item
+                Pricebook item <FieldTag required />
                 <select
                   className="mt-2 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5"
                   id={`pricebook-item-${line.key}`}
@@ -185,7 +189,7 @@ export default function ChangeOrderForm({
                     className="block text-sm font-medium text-zinc-800"
                     htmlFor={`change-quantity-${line.key}`}
                   >
-                    Quantity
+                    Quantity <FieldTag required />
                   </label>
                   <input
                     className="mt-2 w-full rounded-lg border border-zinc-300 px-3 py-2.5"

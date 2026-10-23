@@ -226,7 +226,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
 
   // Now we draw the page.
   return (
-    <main className="min-h-screen bg-zinc-50 px-4 py-8 sm:px-6 lg:px-8 print:min-h-0 print:bg-white print:p-0">
+    <main className="animate-rise min-h-screen bg-zinc-50 px-4 py-8 sm:px-6 lg:px-8 print:min-h-0 print:bg-white print:p-0">
       {/* A centered column that holds everything. */}
       <div className="mx-auto max-w-4xl">
         {/* The top bar with Back and Print. It's marked "no-print", so it won't show up on paper. */}

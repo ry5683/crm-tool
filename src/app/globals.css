@@ -43,6 +43,122 @@ body {
   }
 }
 
+/* Smooth, gentle motion. Everything below is switched off for people who ask their device for less motion. */
+
+/* Pages and cards float up a few pixels while fading in, so screens feel like they arrive rather than pop. */
+@keyframes tinkr-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* A plain fade, used for pop-up backdrops. */
+@keyframes tinkr-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* A pop-up window grows slightly as it appears. */
+@keyframes tinkr-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* The grey placeholder bars shimmer while a page loads. */
+@keyframes tinkr-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Put "animate-rise" on any page or card to make it glide in. */
+.animate-rise {
+  animation: tinkr-rise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Put "stagger" on a list's items and they arrive one after another (each one reads its own --i number). */
+.stagger > * {
+  animation: tinkr-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+.animate-fade {
+  animation: tinkr-fade 0.2s ease-out both;
+}
+
+.animate-pop {
+  animation: tinkr-pop 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* The loading placeholder look. */
+.skeleton {
+  background: linear-gradient(90deg, #e4e4e7 25%, #f4f4f5 50%, #e4e4e7 75%);
+  background-size: 200% 100%;
+  animation: tinkr-shimmer 1.4s linear infinite;
+  border-radius: 0.5rem;
+}
+
+/* Every button and link eases between states, and buttons dip slightly when pressed so taps feel real. */
+button,
+a {
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease,
+    opacity 0.15s ease;
+}
+
+button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+/* Cards marked "lift" rise a touch when you hover them, hinting that they can be clicked. */
+.lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -10px rgb(15 23 42 / 0.25);
+}
+
+/* A clear, friendly ring around whatever you're tabbing to or tapping into. */
+:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Rules that only kick in when printing (or saving as a PDF). */
 @media print {
   /* Paper size and margins: US Letter with 0.6-inch margins. */

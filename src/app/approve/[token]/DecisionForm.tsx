@@ -4,6 +4,7 @@
 // so it can react the instant they type or tap. (The className text, like "rounded-lg bg-green-700", is Tailwind shorthand for how things look.)
 
 // useState is how the app remembers something on screen, like the typed name, and redraws when it changes.
+import { FieldTag } from "@/components/FieldTag";
 import { useState } from "react";
 
 // Only two answers are allowed.
@@ -65,7 +66,7 @@ export default function DecisionForm({ token }: { token: string }) {
           className="block text-sm font-medium text-zinc-800"
           htmlFor="approverName"
         >
-          Your name
+          Your name <FieldTag required />
         </label>
         <input
           autoComplete="name"
