@@ -77,3 +77,11 @@
 - Added tap-to-call, tap-to-text, tap-for-directions (maps) and tap-to-email links on the job's customer card, via `src/lib/contact.ts` (tested in `tests/contact.test.ts`). Page viewport set so phones use the full screen and tint the browser bar.
 - Validation: 17 tests pass, ESLint, TypeScript and production build pass. Checked in a 390px-wide browser: bar pinned to the bottom, tab navigation works, bar hidden at 1280px.
 - Not yet tried on a real phone. Next: open the app on a phone (same Wi-Fi, use the computer's network address with port 3000) and tap through jobs, New job, Pricebook and Call/Text.
+
+## Customers and Team pages (latest)
+
+- App is now named Tinkr. Customers (`/customers`, add, edit, delete, search) and Team (`/team`) pages are built. Customer email, phone and address are required; phone must be `(xxx) xxx-xxxx`.
+- Team invites: an owner enters an email; the server (using `SUPABASE_SERVICE_ROLE_KEY`, server-only in `src/lib/supabase/admin.ts`) creates the login, adds the member, and emails a one-time link through Resend. The link hits `/auth/confirm`, then `/welcome` to set a password. If the email fails, the login and member row are rolled back. The handshake (generateLink, verifyOtp, updateUser) was tested against the real project with a throwaway user.
+- Migration `008_team_management.sql` (`set_member_role`, `remove_team_member`) must be applied in Supabase before changing roles or removing people. Migrations 006 and 007 are still pending as well.
+- Real invite emails need a verified Resend sender domain (same limit as approval emails).
+- Remaining build order the user chose: Invoices list, Sign up and onboarding, Schedule, Dashboard, Settings.

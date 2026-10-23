@@ -96,3 +96,63 @@ export async function sendApprovalRequestEmail(input: {
     throw new Error(`Resend could not send the approval email: ${error.message}`);
   }
 }
+
+// Sends a team invitation: "Join <business> on Tinkr", with a one-time link to set a password.
+// It uses the same Resend settings as the approval email, and throws if anything goes wrong so the caller can undo the invite.
+export async function sendTeamInviteEmail(input: {
+  to: string;
+  businessName: string;
+  role: "owner" | "tech";
+  inviteUrl: string;
+}): Promise<void> {
+  // Run the details past the ground rules first (a real email, a sensible name, and an http(s) link).
+  const parsed = z
+    .object({
+      to: z.email(),
+      businessName: z.string().trim().min(1).max(160),
+      role: z.enum(["owner", "tech"]),
+      inviteUrl: z.url().refine((value) => {
+        const protocol = new URL(value).protocol;
+        return protocol === "http:" || protocol === "https:";
+      }, "Invite link must use HTTP or HTTPS."),
+    })
+    .safeParse(input);
+  if (!parsed.success) {
+    throw new Error(
+      `Invite email details are invalid: ${parsed.error.issues[0]?.message ?? "check the values."}`,
+    );
+  }
+
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  const from = process.env.RESEND_FROM_EMAIL?.trim();
+  if (!apiKey || !from) {
+    throw new Error(
+      "Email is not configured. Set RESEND_API_KEY and RESEND_FROM_EMAIL on the server.",
+    );
+  }
+
+  const { to, businessName, role, inviteUrl } = parsed.data;
+  const roleWords = role === "owner" ? "an owner" : "a technician";
+  const resend = new Resend(apiKey);
+  const { error } = await resend.emails.send({
+    from,
+    to,
+    subject: `You're invited to join ${businessName.replace(/[\r\n]+/g, " ")} on Tinkr`,
+    text: [
+      `${businessName} invited you to join their team on Tinkr as ${roleWords}.`,
+      "",
+      `Accept the invite and choose a password: ${inviteUrl}`,
+      "",
+      "This link works once. If you weren't expecting this, you can ignore the email.",
+    ].join("\n"),
+    html: [
+      `<p><strong>${escapeHtml(businessName)}</strong> invited you to join their team on Tinkr as ${roleWords}.</p>`,
+      `<p><a href="${escapeHtml(inviteUrl)}">Accept the invite and choose a password</a></p>`,
+      `<p>This link works once. If you weren't expecting this, you can ignore the email.</p>`,
+    ].join(""),
+  });
+
+  if (error) {
+    throw new Error(`Resend could not send the invite email: ${error.message}`);
+  }
+}

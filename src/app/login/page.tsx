@@ -33,6 +33,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           Sign in with one of your test accounts.
         </p>
 
+        {/* A red notice if an invite link was already used or has expired. */}
+        {error === "invite" && (
+          <p className="mt-6 rounded-lg bg-red-50 p-3 text-sm text-red-800" role="alert">
+            That invite link has expired or was already used. Ask your owner to send a new one.
+          </p>
+        )}
+
         {/* A red notice that only shows up after a failed sign-in. */}
         {error === "credentials" && (
           <p
