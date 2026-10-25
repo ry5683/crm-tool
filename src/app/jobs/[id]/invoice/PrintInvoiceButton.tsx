@@ -7,7 +7,7 @@ export default function PrintInvoiceButton() {
   // Clicking it opens the print window, which is also how you save a PDF.
   return (
     <button
-      className="no-print rounded-lg bg-blue-700 px-4 py-2 font-medium text-white hover:bg-blue-800"
+      className="no-print rounded-lg bg-hivis-400 px-4 py-2 font-semibold text-zinc-950 hover:bg-hivis-500"
       onClick={() => window.print()}
       type="button"
     >

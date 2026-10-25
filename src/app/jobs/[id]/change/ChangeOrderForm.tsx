@@ -290,7 +290,7 @@ export default function ChangeOrderForm({
         </Link>
         {/* Save draft. It's disabled while saving, if the price book is empty, or if the total isn't valid. */}
         <button
-          className="rounded-lg bg-blue-700 px-5 py-3 font-medium text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-lg bg-hivis-400 px-5 py-3 font-semibold text-zinc-950 hover:bg-hivis-500 disabled:cursor-not-allowed disabled:opacity-60"
           disabled={isPending || items.length === 0 || draftTotal === null}
           type="submit"
         >

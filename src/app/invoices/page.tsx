@@ -141,9 +141,9 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
           {filters.map((filter) => (
             <Link
               aria-current={filter.key === active ? "page" : undefined}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium ${
+              className={`inline-flex min-h-11 items-center rounded-full px-4 text-sm font-medium ${
                 filter.key === active
-                  ? "bg-blue-700 text-white"
+                  ? "bg-zinc-900 text-white"
                   : "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100"
               }`}
               href={filter.key === "all" ? "/invoices" : `/invoices?status=${filter.key}`}

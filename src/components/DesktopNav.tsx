@@ -55,7 +55,7 @@ export default function DesktopNav() {
             <Link
               aria-current={index === activeIndex ? "page" : undefined}
               className={`rounded-md px-3 py-1.5 text-sm font-medium ${
-                index === activeIndex ? "text-blue-700" : "text-zinc-600 hover:text-zinc-950"
+                index === activeIndex ? "text-zinc-950" : "text-zinc-600 hover:text-zinc-950"
               }`}
               href={tab.href}
               key={tab.href}
@@ -69,7 +69,7 @@ export default function DesktopNav() {
           {/* The gliding underline. It moves by changing its position and width, with a smooth transition. */}
           <span
             aria-hidden="true"
-            className="absolute -bottom-px h-0.5 rounded-full bg-blue-600 transition-all duration-300 ease-out"
+            className="absolute -bottom-px h-1 rounded-full bg-hivis-400 transition-all duration-300 ease-out"
             style={{
               left: bar?.left ?? 0,
               width: bar?.width ?? 0,

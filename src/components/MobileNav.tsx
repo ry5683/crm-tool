@@ -101,7 +101,7 @@ export default function MobileNav() {
               opacity: tabs.some((tab) => tab.match(pathname)) ? 1 : 0,
             }}
           >
-            <span className="mx-auto block h-full w-8 rounded-full bg-blue-600" />
+            <span className="mx-auto block h-full w-8 rounded-full bg-hivis-400" />
           </li>
           {tabs.map((tab) => {
             const isActive = tab.match(pathname);
@@ -111,7 +111,7 @@ export default function MobileNav() {
                 <Link
                   aria-current={isActive ? "page" : undefined}
                   className={`flex min-h-14 flex-col items-center justify-center gap-1 text-[10px] font-medium ${
-                    isActive ? "text-blue-700" : "text-zinc-500 active:text-zinc-900"
+                    isActive ? "text-zinc-950" : "text-zinc-500 active:text-zinc-900"
                   }`}
                   href={tab.href}
                 >

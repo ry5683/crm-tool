@@ -39,7 +39,7 @@ export default function MemberRow({
           {/* A round badge with the first letter of the email. */}
           <span
             aria-hidden="true"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-800"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-hivis-100 font-semibold text-hivis-900"
           >
             {email.charAt(0).toUpperCase()}
           </span>

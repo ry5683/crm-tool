@@ -75,7 +75,7 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
             </p>
           </div>
           <Link
-            className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-800"
+            className="rounded-lg bg-hivis-400 px-4 py-2 text-sm font-semibold text-zinc-950 shadow-sm hover:bg-hivis-500"
             href="/customers/new"
           >
             + Add customer
@@ -114,7 +114,7 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
               </p>
               {!query && (
                 <Link
-                  className="mt-5 inline-block rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800"
+                  className="mt-5 inline-block rounded-lg bg-hivis-400 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-hivis-500"
                   href="/customers/new"
                 >
                   Add your first customer
@@ -131,13 +131,13 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
                   style={{ "--i": Math.min(index, 10) } as CSSProperties}
                 >
                   {/* The big tappable part opens the customer's page. */}
-                  <Link className="block rounded-t-xl p-5 hover:bg-blue-50/40" href={`/customers/${customer.id}`}>
+                  <Link className="block rounded-t-xl p-5 hover:bg-hivis-50" href={`/customers/${customer.id}`}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
                         {/* A round badge with the customer's first initial. */}
                         <span
                           aria-hidden="true"
-                          className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-800"
+                          className="flex h-10 w-10 items-center justify-center rounded-full bg-hivis-100 font-semibold text-hivis-900"
                         >
                           {customer.name.charAt(0).toUpperCase()}
                         </span>
@@ -154,14 +154,14 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
                   {/* A quick contact strip: tap the number to call, or the email to write. */}
                   <div className="flex flex-wrap gap-x-5 gap-y-1 border-t border-zinc-100 px-5 py-3 text-sm">
                     {customer.phone && callHref(customer.phone) ? (
-                      <a className="font-medium text-blue-700 hover:underline" href={callHref(customer.phone) ?? undefined}>
+                      <a className="font-medium text-zinc-950 underline decoration-hivis-400 decoration-2 underline-offset-4 hover:decoration-zinc-950" href={callHref(customer.phone) ?? undefined}>
                         {formatPhone(customer.phone)}
                       </a>
                     ) : (
                       <span className="text-zinc-500">No phone</span>
                     )}
                     {customer.email ? (
-                      <a className="break-all text-blue-700 hover:underline" href={`mailto:${customer.email}`}>
+                      <a className="break-all text-zinc-950 underline decoration-hivis-400 decoration-2 underline-offset-4 hover:decoration-zinc-950" href={`mailto:${customer.email}`}>
                         {customer.email}
                       </a>
                     ) : (

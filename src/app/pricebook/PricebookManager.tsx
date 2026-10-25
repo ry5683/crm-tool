@@ -94,7 +94,7 @@ function ItemEditor({ item }: { item: PricebookItem }) {
         </label>
         {/* The Save button. */}
         <button
-          className="self-end rounded-lg bg-blue-700 px-4 py-2 font-medium text-white hover:bg-blue-800 disabled:opacity-60"
+          className="self-end rounded-lg bg-hivis-400 px-4 py-2 font-semibold text-zinc-950 hover:bg-hivis-500 disabled:opacity-60"
           disabled={isUpdating}
           type="submit"
         >
@@ -181,7 +181,7 @@ export default function PricebookManager({
             <div className="sm:col-span-3">
               {/* The Add button. */}
               <button
-                className="rounded-lg bg-blue-700 px-4 py-2 font-medium text-white hover:bg-blue-800 disabled:opacity-60"
+                className="rounded-lg bg-hivis-400 px-4 py-2 font-semibold text-zinc-950 hover:bg-hivis-500 disabled:opacity-60"
                 disabled={isCreating}
                 type="submit"
               >

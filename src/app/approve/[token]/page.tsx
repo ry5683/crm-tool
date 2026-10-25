@@ -67,7 +67,7 @@ export default async function ApprovalPage({ params }: ApprovalPageProps) {
       <main className="animate-rise min-h-screen bg-zinc-50 px-4 py-12">
         <section className="mx-auto max-w-2xl rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
           <Brand />
-          <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-blue-700">
+          <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-hivis-800">
             Change-order approval
           </p>
           <h1 className="mt-2 text-2xl font-semibold text-zinc-950">
@@ -99,7 +99,7 @@ export default async function ApprovalPage({ params }: ApprovalPageProps) {
       <main className="animate-rise min-h-screen bg-zinc-50 px-4 py-12">
         <section className="mx-auto max-w-2xl rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
           <Brand />
-          <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-blue-700">
+          <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-hivis-800">
             Change-order approval
           </p>
           <h1 className="mt-2 text-2xl font-semibold text-zinc-950">
@@ -140,7 +140,7 @@ export default async function ApprovalPage({ params }: ApprovalPageProps) {
       <article className="mx-auto max-w-2xl rounded-xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
         {/* A small label across the top. */}
         <Brand />
-          <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-blue-700">
+          <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-hivis-800">
           Change-order approval
         </p>
         {/* The business name as the big title. */}

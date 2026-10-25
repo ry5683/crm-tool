@@ -48,7 +48,7 @@ export default function WelcomeForm() {
         </p>
       )}
       <button
-        className="w-full rounded-lg bg-blue-700 px-4 py-3 font-medium text-white hover:bg-blue-800 disabled:opacity-60"
+        className="w-full rounded-lg bg-hivis-400 px-4 py-3 font-semibold text-zinc-950 hover:bg-hivis-500 disabled:opacity-60"
         disabled={isPending}
         type="submit"
       >

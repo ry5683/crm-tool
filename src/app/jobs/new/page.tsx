@@ -100,7 +100,7 @@ export default async function NewJobPage({
         {/* The top: a back link, the title and a one-line explainer. */}
         <header>
           <Link
-            className="text-sm font-medium text-blue-700 hover:underline"
+            className="text-sm font-medium text-zinc-950 underline decoration-hivis-400 decoration-2 underline-offset-4 hover:decoration-zinc-950"
             href="/jobs"
           >
             ← Back to jobs

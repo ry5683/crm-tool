@@ -157,7 +157,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
           <div className="hidden md:block">
             {/* Button to make a new job. (The rest of the menu lives in the top bar.) */}
             <Link
-              className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-800"
+              className="rounded-lg bg-hivis-400 px-4 py-2 text-sm font-semibold text-zinc-950 shadow-sm hover:bg-hivis-500"
               href="/jobs/new"
             >
               + New job
@@ -181,7 +181,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
               </p>
               {!requestedJobId && (
                 <Link
-                  className="mt-5 inline-block rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800"
+                  className="mt-5 inline-block rounded-lg bg-hivis-400 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-hivis-500"
                   href="/jobs/new"
                 >
                   Create your first job
@@ -198,7 +198,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
               >
                 {/* The big clickable part of the card. Tap it to open the job. */}
                 <Link
-                  className="block rounded-t-xl p-5 transition-colors hover:bg-blue-50/40"
+                  className="block rounded-t-xl p-5 transition-colors hover:bg-hivis-50"
                   href={`/jobs/${job.id}`}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">

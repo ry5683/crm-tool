@@ -232,7 +232,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
         {/* The top bar with Back and Print. It's marked "no-print", so it won't show up on paper. */}
         <nav className="no-print mb-5 flex items-center justify-between gap-3">
           <Link
-            className="text-sm font-medium text-blue-700 hover:underline"
+            className="text-sm font-medium text-zinc-950 underline decoration-hivis-400 decoration-2 underline-offset-4 hover:decoration-zinc-950"
             href={`/jobs/${job.id}`}
           >
             ← Back to job
@@ -245,7 +245,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
           {/* The invoice heading: business name, job reference and today's date. */}
           <header className="flex flex-wrap items-start justify-between gap-6 border-b border-zinc-200 pb-6">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-blue-700 print:text-black">
+              <p className="text-sm font-semibold uppercase tracking-wide text-hivis-800 print:text-black">
                 Invoice
               </p>
               <h1 className="mt-2 text-3xl font-bold tracking-tight text-zinc-950">

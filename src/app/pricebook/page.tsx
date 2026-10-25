@@ -78,7 +78,7 @@ export default async function PricebookPage() {
       <div className="mx-auto max-w-4xl">
         {/* A link back to the jobs list. */}
         <Link
-          className="text-sm font-medium text-blue-700 hover:underline"
+          className="text-sm font-medium text-zinc-950 underline decoration-hivis-400 decoration-2 underline-offset-4 hover:decoration-zinc-950"
           href="/jobs"
         >
           ← Back to jobs

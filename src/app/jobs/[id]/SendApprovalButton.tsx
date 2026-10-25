@@ -56,7 +56,7 @@ export default function SendApprovalButton({
     <div className="mt-4">
       {/* The button, greyed out while it's sending. */}
       <button
-        className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+        className="rounded-lg bg-hivis-400 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-hivis-500 disabled:cursor-not-allowed disabled:opacity-60"
         disabled={isPending}
         onClick={send}
         type="button"

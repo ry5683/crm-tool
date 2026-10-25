@@ -186,7 +186,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const customer = customerData as Customer;
   // A small "Add" link shown next to any missing detail, taking you straight to the edit page.
   const addLink = (
-    <Link className="font-medium text-blue-700 hover:underline" href={`/jobs/${job.id}/edit`}>
+    <Link className="font-medium text-zinc-950 underline decoration-hivis-400 decoration-2 underline-offset-4 hover:decoration-zinc-950" href={`/jobs/${job.id}/edit`}>
       Add
     </Link>
   );
@@ -237,7 +237,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
       <div className="mx-auto max-w-3xl">
         {/* A link back to the jobs list. */}
         <Link
-          className="text-sm font-medium text-blue-700 hover:underline"
+          className="text-sm font-medium text-zinc-950 underline decoration-hivis-400 decoration-2 underline-offset-4 hover:decoration-zinc-950"
           href="/jobs"
         >
           ← Back to jobs
@@ -247,7 +247,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
         <header className="mt-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">
+              <p className="text-sm font-semibold uppercase tracking-wide text-hivis-800">
                 Job
               </p>
               <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">
@@ -265,7 +265,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
               </Link>
               {/* Starts a new change order for this job. */}
               <Link
-                className="rounded-lg bg-blue-700 px-3 py-2 text-sm font-medium text-white hover:bg-blue-800"
+                className="rounded-lg bg-hivis-400 px-3 py-2 text-sm font-semibold text-zinc-950 hover:bg-hivis-500"
                 href={`/jobs/${job.id}/change`}
               >
                 New change order
@@ -308,7 +308,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-lg font-semibold text-zinc-950">Customer</h2>
             <Link
-              className="text-sm font-medium text-blue-700 hover:underline"
+              className="text-sm font-medium text-zinc-950 underline decoration-hivis-400 decoration-2 underline-offset-4 hover:decoration-zinc-950"
               href={`/jobs/${job.id}/edit`}
             >
               Edit contact
@@ -325,7 +325,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                 {/* Tapping the address opens it in the phone's maps app for directions. */}
                 {customer.address ? (
                   <a
-                    className="text-blue-700 underline underline-offset-2"
+                    className="text-zinc-950 underline decoration-hivis-400 decoration-2 underline-offset-4 hover:decoration-zinc-950"
                     href={mapsHref(customer.address)}
                     rel="noopener noreferrer"
                     target="_blank"
@@ -343,7 +343,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                 {/* Tapping the email opens the phone's mail app with the customer already filled in. */}
                 {customer.email ? (
                   <a
-                    className="break-all text-blue-700 underline underline-offset-2"
+                    className="break-all text-zinc-950 underline decoration-hivis-400 decoration-2 underline-offset-4 hover:decoration-zinc-950"
                     href={`mailto:${customer.email}`}
                   >
                     {customer.email}
@@ -361,7 +361,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="tabular-nums">{formatPhone(customer.phone)}</span>
                     <a
-                      className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800"
+                      className="rounded-lg bg-hivis-400 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-hivis-500"
                       href={callHref(customer.phone) ?? undefined}
                     >
                       Call
@@ -442,7 +442,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
               Change orders
             </h2>
             <Link
-              className="font-medium text-blue-700 hover:underline"
+              className="font-medium text-zinc-950 underline decoration-hivis-400 decoration-2 underline-offset-4 hover:decoration-zinc-950"
               href={`/jobs/${job.id}/change`}
             >
               Create change order

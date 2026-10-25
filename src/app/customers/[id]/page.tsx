@@ -84,7 +84,7 @@ export default async function CustomerPage({ params }: CustomerPageProps) {
   return (
     <main className="animate-rise min-h-screen bg-zinc-50 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-3xl">
-        <Link className="text-sm font-medium text-blue-700 hover:underline" href="/customers">
+        <Link className="text-sm font-medium text-zinc-950 underline decoration-hivis-400 decoration-2 underline-offset-4 hover:decoration-zinc-950" href="/customers">
           ← Back to customers
         </Link>
 
@@ -93,7 +93,7 @@ export default async function CustomerPage({ params }: CustomerPageProps) {
           <div className="flex items-center gap-4">
             <span
               aria-hidden="true"
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 text-xl font-semibold text-blue-800"
+              className="flex h-14 w-14 items-center justify-center rounded-full bg-hivis-100 text-xl font-semibold text-hivis-900"
             >
               {customer.name.charAt(0).toUpperCase()}
             </span>
@@ -110,7 +110,7 @@ export default async function CustomerPage({ params }: CustomerPageProps) {
           </div>
           <div className="flex flex-wrap items-start gap-2">
             <Link
-              className="rounded-lg bg-blue-700 px-3 py-2 text-sm font-medium text-white hover:bg-blue-800"
+              className="rounded-lg bg-hivis-400 px-3 py-2 text-sm font-semibold text-zinc-950 hover:bg-hivis-500"
               href={`/jobs/new?customer=${customer.id}`}
             >
               + New job
@@ -147,10 +147,10 @@ export default async function CustomerPage({ params }: CustomerPageProps) {
                 {dialable ? (
                   <>
                     <span className="tabular-nums">{formatPhone(dialable)}</span>
-                    <a className="rounded-lg bg-blue-700 px-3 py-1.5 text-sm text-white hover:bg-blue-800" href={callHref(dialable) ?? undefined}>
+                    <a className="inline-flex min-h-11 items-center rounded-lg bg-hivis-400 px-4 text-sm font-semibold text-zinc-950 hover:bg-hivis-500" href={callHref(dialable) ?? undefined}>
                       Call
                     </a>
-                    <a className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm text-zinc-800 hover:bg-zinc-50" href={textHref(dialable) ?? undefined}>
+                    <a className="inline-flex min-h-11 items-center rounded-lg border border-zinc-300 px-4 text-sm font-medium text-zinc-800 hover:bg-zinc-50" href={textHref(dialable) ?? undefined}>
                       Text
                     </a>
                   </>
@@ -163,7 +163,7 @@ export default async function CustomerPage({ params }: CustomerPageProps) {
               <dt className="text-sm text-zinc-500">Email</dt>
               <dd className="mt-1 font-medium text-zinc-950">
                 {customer.email ? (
-                  <a className="break-all text-blue-700 underline underline-offset-2" href={`mailto:${customer.email}`}>
+                  <a className="break-all text-zinc-950 underline decoration-hivis-400 decoration-2 underline-offset-4 hover:decoration-zinc-950" href={`mailto:${customer.email}`}>
                     {customer.email}
                   </a>
                 ) : (
@@ -176,7 +176,7 @@ export default async function CustomerPage({ params }: CustomerPageProps) {
               <dd className="mt-1 font-medium text-zinc-950">
                 {customer.address ? (
                   <a
-                    className="text-blue-700 underline underline-offset-2"
+                    className="text-zinc-950 underline decoration-hivis-400 decoration-2 underline-offset-4 hover:decoration-zinc-950"
                     href={mapsHref(customer.address)}
                     rel="noopener noreferrer"
                     target="_blank"
@@ -199,7 +199,7 @@ export default async function CustomerPage({ params }: CustomerPageProps) {
               <p className="font-semibold text-zinc-900">No jobs yet</p>
               <p className="mt-1 text-sm text-zinc-600">Start one for {customer.name} and it will show up here.</p>
               <Link
-                className="mt-4 inline-block rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800"
+                className="mt-4 inline-block rounded-lg bg-hivis-400 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-hivis-500"
                 href={`/jobs/new?customer=${customer.id}`}
               >
                 Create a job

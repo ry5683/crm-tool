@@ -14,8 +14,26 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  /* Barlow is modeled on California highway signs: plain, sturdy and easy to read at a glance.
+     The semi-condensed cut is for headings. */
+  --font-sans: var(--font-barlow);
+  --font-display: var(--font-barlow-condensed);
   --font-mono: var(--font-geist-mono);
+
+  /* Hi-vis yellow, like a safety vest or a tape measure. Used as "bg-hivis-400", "text-hivis-800" and so on.
+     400 is the main button color (with near-black text, it stays readable in direct sun).
+     700 and darker are dark enough to use as text on white. */
+  --color-hivis-50: #fffae6;
+  --color-hivis-100: #fff1bf;
+  --color-hivis-200: #ffe380;
+  --color-hivis-300: #ffd340;
+  --color-hivis-400: #ffc20e;
+  --color-hivis-500: #f5b300;
+  --color-hivis-600: #cc9200;
+  --color-hivis-700: #8a5d00;
+  --color-hivis-800: #6b4700;
+  --color-hivis-900: #5a3c00;
+  --color-hivis-950: #3a2700;
 }
 
 /* If the visitor's device is in dark mode, switch to a near-black background and light text. */
@@ -26,11 +44,27 @@
   }
 }
 
-/* Apply those colors and a plain Arial-style font to the whole page. */
+/* Apply those colors and the Barlow font to the whole page. */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, sans-serif;
+}
+
+@layer base {
+  /* Headings use the narrower, sign-style cut of Barlow. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
+  /* In tables, every digit is the same width, so dollar amounts line up in neat columns. */
+  td,
+  th {
+    font-variant-numeric: tabular-nums;
+  }
 }
 
 /* iPhones (Safari) zoom the whole page in when you tap a box whose text is smaller than 16px, which is annoying.
@@ -43,13 +77,15 @@ body {
   }
 }
 
-/* Smooth, gentle motion. Everything below is switched off for people who ask their device for less motion. */
+/* Motion. The rule for this app: animations should be quick and quiet. Techs open these screens dozens of times a day,
+   so anything slow or floaty becomes waiting. Most motion here lasts about a fifth of a second.
+   Everything below is switched off for people who ask their device for less motion. */
 
-/* Pages and cards float up a few pixels while fading in, so screens feel like they arrive rather than pop. */
+/* Pages and cards fade in while settling a few pixels into place, so screens arrive instead of popping. */
 @keyframes tinkr-rise {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
@@ -89,15 +125,22 @@ body {
   }
 }
 
-/* Put "animate-rise" on any page or card to make it glide in. */
+/* Put "animate-rise" on any page or card to make it fade in. */
 .animate-rise {
-  animation: tinkr-rise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: tinkr-rise 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
-/* Put "stagger" on a list's items and they arrive one after another (each one reads its own --i number). */
+/* Put "stagger" on a list's items and they arrive one after another (each one reads its own --i number).
+   The cascade stops growing after the 6th item, so a long list never makes anyone wait. */
 .stagger > * {
-  animation: tinkr-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: calc(var(--i, 0) * 60ms);
+  animation: tinkr-rise 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(min(var(--i, 0), 6) * 35ms);
+}
+
+/* Loading placeholders wait a moment before appearing. If the page loads fast (most of the time), nobody sees a
+   flash of grey boxes; if it's slow, the placeholders fade in to show the tap worked. */
+.loading-delay {
+  animation: tinkr-fade 0.2s ease-out 0.15s both;
 }
 
 .animate-fade {
@@ -116,9 +159,11 @@ body {
   border-radius: 0.5rem;
 }
 
-/* Every button and link eases between states, and buttons dip slightly when pressed so taps feel real. */
+/* Every button and link eases between states, and buttons dip slightly when pressed so taps feel real.
+   "manipulation" tells phones these are for tapping, not double-tap zooming, so they respond right away. */
 button,
 a {
+  touch-action: manipulation;
   transition:
     background-color 0.15s ease,
     border-color 0.15s ease,
@@ -132,20 +177,35 @@ button:not(:disabled):active {
   transform: scale(0.97);
 }
 
-/* Cards marked "lift" rise a touch when you hover them, hinting that they can be clicked. */
-.lift:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px -10px rgb(15 23 42 / 0.25);
-}
-
-/* A clear, friendly ring around whatever you're tabbing to or tapping into. */
-:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
-}
-
+/* Phones flash a grey box over anything tapped. We hide that because our buttons and cards show their own press. */
 html {
-  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Cards marked "lift" rise a touch when a mouse hovers them, hinting that they can be clicked.
+   Only on devices with a real mouse: on touchscreens, hover effects get "stuck" after a tap. */
+@media (hover: hover) and (pointer: fine) {
+  .lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -10px rgb(15 23 42 / 0.25);
+  }
+}
+
+/* On touch, cards press in slightly instead, so a tap feels answered. */
+.lift {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+.lift:active {
+  transform: scale(0.99);
+}
+
+/* A clear, dark ring around whatever you're tabbing to or tapping into. (Yellow would vanish on white.) */
+:focus-visible {
+  outline: 2px solid #18181b;
+  outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {

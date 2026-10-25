@@ -1,4 +1,4 @@
-// The Tinkr logo: a little rounded blue badge with a "T", followed by the name.
+// The Tinkr logo: a hi-vis yellow tag with a "T", followed by the name.
 // It's used at the top of pages so people always know what app they're in.
 
 // "size" picks a small or large version.
@@ -12,7 +12,7 @@ export default function Brand({ size = "sm" }: { size?: "sm" | "lg" }) {
       {/* The badge itself. */}
       <span
         aria-hidden="true"
-        className={`${badge} flex items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 font-bold text-white shadow-sm`}
+        className={`${badge} flex items-center justify-center rounded-md bg-hivis-400 font-bold text-zinc-950 shadow-sm`}
       >
         T
       </span>

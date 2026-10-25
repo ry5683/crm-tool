@@ -53,7 +53,7 @@ export default function InviteForm() {
         </select>
       </div>
       <button
-        className="rounded-lg bg-blue-700 px-5 py-2.5 font-medium text-white hover:bg-blue-800 disabled:opacity-60"
+        className="rounded-lg bg-hivis-400 px-5 py-2.5 font-semibold text-zinc-950 hover:bg-hivis-500 disabled:opacity-60"
         disabled={isPending}
         type="submit"
       >

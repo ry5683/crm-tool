@@ -1,5 +1,5 @@
 // This is the sign-in page (/login) where your staff type their email and password.
-// (className text like "rounded-lg bg-blue-700" is Tailwind shorthand for how things look.)
+// (className text like "rounded-lg bg-hivis-400" is Tailwind shorthand for how things look.)
 
 // The sign-in action that fires when the form is submitted.
 import { FieldTag } from "@/components/FieldTag";
@@ -62,7 +62,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </label>
             <input
               autoComplete="email"
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-zinc-950 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-zinc-950 outline-none focus:border-zinc-900 focus:ring-2 focus:ring-hivis-200"
               id="email"
               name="email"
               required
@@ -80,7 +80,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </label>
             <input
               autoComplete="current-password"
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-zinc-950 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-zinc-950 outline-none focus:border-zinc-900 focus:ring-2 focus:ring-hivis-200"
               id="password"
               name="password"
               required
@@ -90,7 +90,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
           {/* The Sign in button. */}
           <button
-            className="w-full rounded-lg bg-blue-700 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="w-full rounded-lg bg-hivis-400 px-4 py-3 font-semibold text-zinc-950 transition-colors hover:bg-hivis-500 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2"
             type="submit"
           >
             Sign in

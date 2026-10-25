@@ -75,14 +75,14 @@ export default async function ChangeOrderPage({ params }: ChangePageProps) {
       <div className="mx-auto max-w-3xl">
         {/* A link back to the job. */}
         <Link
-          className="text-sm font-medium text-blue-700 hover:underline"
+          className="text-sm font-medium text-zinc-950 underline decoration-hivis-400 decoration-2 underline-offset-4 hover:decoration-zinc-950"
           href={`/jobs/${id}`}
         >
           ← Back to job
         </Link>
         {/* The top: the job's name, the page title and a quick explainer. */}
         <header className="mt-4">
-          <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">
+          <p className="text-sm font-semibold uppercase tracking-wide text-hivis-800">
             {job.description}
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
@@ -100,7 +100,7 @@ export default async function ChangeOrderPage({ params }: ChangePageProps) {
               Add at least one pricebook item before creating a change order.
             </p>
             <Link
-              className="mt-3 inline-block font-medium text-blue-700 underline"
+              className="mt-3 inline-block font-medium text-zinc-950 underline decoration-hivis-400 decoration-2 underline-offset-4 hover:decoration-zinc-950"
               href="/pricebook"
             >
               Open pricebook

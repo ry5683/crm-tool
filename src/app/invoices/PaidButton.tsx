@@ -16,7 +16,7 @@ export default function PaidButton({ jobId, paid }: { jobId: string; paid: boole
       {/* Sending the opposite of what it is now. */}
       <input name="paid" type="hidden" value={paid ? "false" : "true"} />
       <button
-        className={`rounded-lg px-3 py-1.5 text-sm font-medium disabled:opacity-60 ${
+        className={`min-h-11 rounded-lg px-4 text-sm font-medium disabled:opacity-60 ${
           paid
             ? "border border-zinc-300 text-zinc-700 hover:bg-zinc-50"
             : "bg-emerald-600 text-white hover:bg-emerald-700"

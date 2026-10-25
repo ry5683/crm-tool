@@ -7,6 +7,7 @@ import "server-only";
 import { Resend } from "resend";
 import { z } from "zod";
 import { formatCents } from "@/lib/money";
+import { emailButton, emailLayout, emailParagraph } from "@/lib/email-layout";
 
 // Ground rules before we send: a real email address, text that isn't blank or crazy long,
 // a total in whole cents, and a link that starts with http or https.
@@ -83,12 +84,16 @@ export async function sendApprovalRequestEmail(input: {
       "",
       `Review and respond: ${approvalUrl}`,
     ].join("\n"),
-    html: [
-      `<p><strong>${safeBusinessName}</strong> sent you a change order for approval.</p>`,
-      `<p>${safeDescription}</p>`,
-      `<p><strong>Total: ${escapeHtml(formattedTotal)}</strong></p>`,
-      `<p><a href="${safeApprovalUrl}">Review and respond</a></p>`,
-    ].join(""),
+    // The nicer version, dressed in the app's look (see email-layout.ts).
+    html: emailLayout({
+      preview: `${safeBusinessName} sent you a change order for ${escapeHtml(formattedTotal)}.`,
+      body: [
+        emailParagraph(`<strong>${safeBusinessName}</strong> sent you a change order for approval.`),
+        emailParagraph(safeDescription),
+        emailParagraph(`<strong style="font-size:20px;">Total: ${escapeHtml(formattedTotal)}</strong>`),
+        emailButton(safeApprovalUrl, "Review and respond"),
+      ].join(""),
+    }),
   });
 
   // If Resend says something went wrong, raise it so the caller can clean up.
@@ -145,11 +150,14 @@ export async function sendTeamInviteEmail(input: {
       "",
       "This link works once. If you weren't expecting this, you can ignore the email.",
     ].join("\n"),
-    html: [
-      `<p><strong>${escapeHtml(businessName)}</strong> invited you to join their team on Tinkr as ${roleWords}.</p>`,
-      `<p><a href="${escapeHtml(inviteUrl)}">Accept the invite and choose a password</a></p>`,
-      `<p>This link works once. If you weren't expecting this, you can ignore the email.</p>`,
-    ].join(""),
+    html: emailLayout({
+      preview: `Join ${escapeHtml(businessName)} on Tinkr.`,
+      body: [
+        emailParagraph(`<strong>${escapeHtml(businessName)}</strong> invited you to join their team on Tinkr as ${roleWords}.`),
+        emailButton(escapeHtml(inviteUrl), "Accept the invite and choose a password"),
+        emailParagraph(`This link works once. If you weren't expecting this, you can ignore the email.`),
+      ].join(""),
+    }),
   });
 
   if (error) {

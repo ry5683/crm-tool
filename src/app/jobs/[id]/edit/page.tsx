@@ -129,7 +129,7 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
         {/* The top: a back link, the title and a short explainer. */}
         <header>
           <Link
-            className="text-sm font-medium text-blue-700 hover:underline"
+            className="text-sm font-medium text-zinc-950 underline decoration-hivis-400 decoration-2 underline-offset-4 hover:decoration-zinc-950"
             href={`/jobs/${job.id}`}
           >
             ← Back to job

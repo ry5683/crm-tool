@@ -4,15 +4,23 @@
 // Borrowing a couple of type labels, two Google fonts, and the app-wide look from globals.css.
 import type { Metadata, Viewport } from "next";
 import { Suspense, type ReactNode } from "react";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Barlow, Barlow_Semi_Condensed, Geist_Mono } from "next/font/google";
 import DesktopNav from "@/components/DesktopNav";
 import MobileNav from "@/components/MobileNav";
 import "./globals.css";
 
-// The main font (Geist) for normal text.
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// The main font (Barlow) for normal text. It's modeled on highway signs, so it reads well at a glance.
+const barlow = Barlow({
+  variable: "--font-barlow",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+// A slightly narrower cut of the same font for headings.
+const barlowCondensed = Barlow_Semi_Condensed({
+  variable: "--font-barlow-condensed",
+  subsets: ["latin"],
+  weight: ["600", "700"],
 });
 
 // A typewriter-style font (Geist Mono) for anything code-like.
@@ -25,6 +33,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: { default: "Tinkr", template: "%s · Tinkr" },
   description: "Tinkr: change orders, approvals and invoices for the trades",
+  // iPhones ignore parts of the manifest, so this tells them directly: when saved to the home screen,
+  // open full screen like an app, and use "Tinkr" as the name under the icon.
+  // (The home screen icon itself comes from src/app/apple-icon.png.)
+  appleWebApp: {
+    capable: true,
+    title: "Tinkr",
+    statusBarStyle: "default",
+  },
 };
 
 // How the page fits a phone screen. "cover" lets the page use the full screen on iPhones with a notch,
@@ -33,7 +49,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#1d4ed8",
+  themeColor: "#18181b",
 };
 
 // The frame itself. "children" is whichever page is showing right now.
@@ -43,7 +59,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${barlow.variable} ${barlowCondensed.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {/* The top menu for laptops. It hides itself on phones, the sign-in page and customer pages. */}
