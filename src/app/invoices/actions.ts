@@ -14,16 +14,13 @@ export async function setInvoicePaid(
 ): Promise<InvoiceActionState> {
   const jobId = formData.get("jobId");
   const paid = formData.get("paid") === "true";
-  if (typeof jobId !== "string" || !jobId) return { error: "Missing job." };
+  if (typeof jobId !== "string" || !/^[0-9a-f-]{36}$/i.test(jobId)) return { error: "Missing job." };
 
-  const { supabase, businessId, role } = await requireSession();
+  const { supabase, role } = await requireSession();
   if (role !== "owner") return { error: "Only an owner can change payment status." };
 
-  const { error } = await supabase
-    .from("jobs")
-    .update({ paid_at: paid ? new Date().toISOString() : null })
-    .eq("id", jobId)
-    .eq("business_id", businessId);
+  // The database double-checks that you're an owner (migration 011), so this can't be done around the app.
+  const { error } = await supabase.rpc("set_job_paid", { p_job_id: jobId, p_paid: paid });
   if (error) {
     console.error("Could not update payment status.", error);
     return { error: "Couldn't update that invoice. Please try again." };

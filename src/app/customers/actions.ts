@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireSession } from "@/lib/session";
+import { encryptContact } from "@/lib/field-crypto";
 
 // What each action tells the form afterward: an error message, or null if all went well.
 export type CustomerActionState = { error: string | null };
@@ -52,7 +53,7 @@ export async function createCustomer(
   const { supabase, businessId } = await requireSession();
   const { data, error } = await supabase
     .from("customers")
-    .insert({ business_id: businessId, ...parsed.data })
+    .insert({ business_id: businessId, ...encryptContact(parsed.data) })
     .select("id")
     .single();
   if (error || !data) {
@@ -88,7 +89,7 @@ export async function updateCustomer(
   const { supabase, businessId } = await requireSession();
   const { data, error } = await supabase
     .from("customers")
-    .update(parsed.data)
+    .update(encryptContact(parsed.data))
     .eq("id", id)
     .eq("business_id", businessId)
     .select("id");

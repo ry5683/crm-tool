@@ -4,6 +4,7 @@
 // Borrowed tools: money math, our login/database connection (Supabase), links, "not found" and redirect helpers, some shared display pieces (the line item table and status badge) and this job's buttons.
 import { totalCents } from "@/lib/money";
 import { callHref, formatPhone, mapsHref, textHref, usPhoneDigits } from "@/lib/contact";
+import { declineReasonLabel } from "@/lib/decline-reasons";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -14,6 +15,7 @@ import StatusBadge, {
 } from "@/components/StatusBadge";
 import SendApprovalButton from "./SendApprovalButton";
 import DeleteJobButton from "./DeleteJobButton";
+import { decryptContact } from "@/lib/field-crypto";
 
 // Quick descriptions of the info we pull in. A Job is its ID, business, customer, assigned technician, status, description and creation date.
 type Job = {
@@ -183,7 +185,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
   }
 
   // Label the loaded info with the shapes above. Only an owner is allowed to delete the job.
-  const customer = customerData as Customer;
+  const customer = decryptContact(customerData as Customer);
   // A small "Add" link shown next to any missing detail, taking you straight to the edit page.
   const addLink = (
     <Link className="font-medium text-zinc-950 underline decoration-hivis-400 decoration-2 underline-offset-4 hover:decoration-zinc-950" href={`/jobs/${job.id}/edit`}>
@@ -211,6 +213,28 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
   if (changeOrderLineError) {
     throw new Error(`Could not load change-order lines: ${changeOrderLineError.message}`);
   }
+
+  // For declined change orders, load the reason the customer gave (newest answer first).
+  const declinedIds = changeOrders.filter((co) => co.status === "declined").map((co) => co.id);
+  const { data: declineData, error: declineError } =
+    declinedIds.length > 0
+      ? await supabase
+          .from("approvals")
+          .select("change_order_id, approver_name, decline_reason, decline_note")
+          .eq("business_id", job.business_id)
+          .in("change_order_id", declinedIds)
+          .eq("decision", "declined")
+          .order("decided_at", { ascending: false })
+      : { data: [], error: null };
+  if (declineError) {
+    throw new Error(`Could not load decline reasons: ${declineError.message}`);
+  }
+  const declines = (declineData ?? []) as {
+    change_order_id: string;
+    approver_name: string | null;
+    decline_reason: string | null;
+    decline_note: string | null;
+  }[];
 
   // A safety check: each change order's saved total should match the sum of its lines. If it doesn't, we stop instead of showing money that's wrong.
   const changeOrderLines = changeOrderLineData as ChangeOrderLine[];
@@ -492,6 +516,22 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                         totalLabel="Change-order total"
                       />
                     </div>
+                    {/* Why the customer declined, if they said. */}
+                    {(() => {
+                      const decline = declines.find((d) => d.change_order_id === changeOrder.id);
+                      const label = declineReasonLabel(decline?.decline_reason);
+                      if (!decline || !label) return null;
+                      return (
+                        <div className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-900">
+                          <p className="font-medium">
+                            Declined{decline.approver_name ? ` by ${decline.approver_name}` : ""}: {label}
+                          </p>
+                          {decline.decline_note && (
+                            <p className="mt-1 whitespace-pre-wrap">{decline.decline_note}</p>
+                          )}
+                        </div>
+                      );
+                    })()}
                     {/* Only drafts get the "Send for customer approval" button, since the others have already gone out. */}
                     {changeOrder.status === "draft" && (
                       <SendApprovalButton changeOrderId={changeOrder.id} />

@@ -1,3 +1,4 @@
+
 "use client";
 
 // This is the Approve / Decline form at the bottom of the customer's page. It's a "client component," meaning it runs in the customer's own browser
@@ -5,6 +6,13 @@
 
 // useState is how the app remembers something on screen, like the typed name, and redraws when it changes.
 import { FieldTag } from "@/components/FieldTag";
+import {
+  DECLINE_NOTE_MAX,
+  DECLINE_REASONS,
+  declineNoteError,
+  isDeclineReasonCode,
+  type DeclineReasonCode,
+} from "@/lib/decline-reasons";
 import { useState } from "react";
 
 // Only two answers are allowed.
@@ -17,9 +25,24 @@ export default function DecisionForm({ token }: { token: string }) {
   const [error, setError] = useState<string | null>(null);
   const [decision, setDecision] = useState<Decision | null>(null);
   const [isPending, setIsPending] = useState(false);
+  // Declining is a two-step flow: tap Decline, pick a reason, add a note, then confirm.
+  const [declining, setDeclining] = useState(false);
+  const [reason, setReason] = useState<DeclineReasonCode | "">("");
+  const [note, setNote] = useState("");
 
   // This runs when a button gets pressed. It sends the answer to the server and then shows what happened.
   async function submit(selectedDecision: Decision) {
+    if (selectedDecision === "declined") {
+      if (!isDeclineReasonCode(reason)) {
+        setError("Please choose a reason for declining.");
+        return;
+      }
+      const noteProblem = declineNoteError(reason, note);
+      if (noteProblem) {
+        setError(noteProblem);
+        return;
+      }
+    }
     // Wipe any old error, and mark ourselves busy so nobody double-taps.
     setError(null);
     setIsPending(true);
@@ -28,7 +51,12 @@ export default function DecisionForm({ token }: { token: string }) {
       const response = await fetch("/api/approvals/decide", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, decision: selectedDecision, approverName }),
+        body: JSON.stringify({
+          token,
+          decision: selectedDecision,
+          approverName,
+          ...(selectedDecision === "declined" && { declineReason: reason, declineNote: note.trim() }),
+        }),
       });
       const result = (await response.json()) as { status?: string; error?: string };
       // If the server said no (link already used, expired, etc.), show its plain-English reason and stop.
@@ -84,25 +112,91 @@ export default function DecisionForm({ token }: { token: string }) {
           {error}
         </p>
       )}
-      {/* Approve and Decline. Both stay greyed out until there's a name or while a send is in progress. */}
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <button
-          className="rounded-lg bg-green-700 px-5 py-3 font-medium text-white hover:bg-green-800 disabled:opacity-60"
-          disabled={isPending || !approverName.trim()}
-          onClick={() => submit("approved")}
-          type="button"
-        >
-          Approve
-        </button>
-        <button
-          className="rounded-lg border border-red-300 px-5 py-3 font-medium text-red-800 hover:bg-red-50 disabled:opacity-60"
-          disabled={isPending || !approverName.trim()}
-          onClick={() => submit("declined")}
-          type="button"
-        >
-          Decline
-        </button>
-      </div>
+      {declining ? (
+        <div className="space-y-4 rounded-lg border border-zinc-200 p-4">
+          <div>
+            <label className="block text-sm font-medium text-zinc-800" htmlFor="declineReason">
+              Why are you declining? <FieldTag required />
+            </label>
+            <select
+              className="mt-2 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5"
+              id="declineReason"
+              onChange={(event) => {
+                setReason(isDeclineReasonCode(event.target.value) ? event.target.value : "");
+                setError(null);
+              }}
+              value={reason}
+            >
+              <option value="">Select a reason…</option>
+              {DECLINE_REASONS.map((option) => (
+                <option key={option.code} value={option.code}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          {reason && (
+            <div>
+              <label className="block text-sm font-medium text-zinc-800" htmlFor="declineNote">
+                {reason === "other" ? "Please explain" : "Anything else you'd like to add?"}{" "}
+                <FieldTag required={reason === "other"} />
+              </label>
+              <textarea
+                className="mt-2 w-full rounded-lg border border-zinc-300 px-3 py-2.5"
+                id="declineNote"
+                maxLength={DECLINE_NOTE_MAX}
+                onChange={(event) => setNote(event.target.value)}
+                rows={4}
+                value={note}
+              />
+              <p className="mt-1 text-right text-xs text-zinc-500">
+                {note.length}/{DECLINE_NOTE_MAX}
+              </p>
+            </div>
+          )}
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <button
+              className="rounded-lg bg-red-700 px-5 py-3 font-medium text-white hover:bg-red-800 disabled:opacity-60"
+              disabled={isPending || !reason || !approverName.trim()}
+              onClick={() => submit("declined")}
+              type="button"
+            >
+              Confirm decline
+            </button>
+            <button
+              className="rounded-lg border border-zinc-300 px-5 py-3 font-medium text-zinc-800 hover:bg-zinc-50"
+              disabled={isPending}
+              onClick={() => {
+                setDeclining(false);
+                setError(null);
+              }}
+              type="button"
+            >
+              Back
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* Approve and Decline. Both stay greyed out until there's a name or while a send is in progress. */
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button
+            className="rounded-lg bg-green-700 px-5 py-3 font-medium text-white hover:bg-green-800 disabled:opacity-60"
+            disabled={isPending || !approverName.trim()}
+            onClick={() => submit("approved")}
+            type="button"
+          >
+            Approve
+          </button>
+          <button
+            className="rounded-lg border border-red-300 px-5 py-3 font-medium text-red-800 hover:bg-red-50 disabled:opacity-60"
+            disabled={isPending || !approverName.trim()}
+            onClick={() => setDeclining(true)}
+            type="button"
+          >
+            Decline
+          </button>
+        </div>
+      )}
     </div>
   );
 }

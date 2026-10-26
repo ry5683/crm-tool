@@ -9,6 +9,7 @@ import { callHref, formatPhone, mapsHref, textHref, usPhoneDigits } from "@/lib/
 import { formatCents, totalCents } from "@/lib/money";
 import { requireSession } from "@/lib/session";
 import DeleteCustomerButton from "../DeleteCustomerButton";
+import { decryptContact } from "@/lib/field-crypto";
 
 type CustomerPageProps = { params: Promise<{ id: string }> };
 
@@ -46,7 +47,7 @@ export default async function CustomerPage({ params }: CustomerPageProps) {
   if (jobResult.error) {
     throw new Error(`Could not load jobs: ${jobResult.error.message}`);
   }
-  const customer = customerResult.data;
+  const customer = customerResult.data && decryptContact(customerResult.data);
   if (!customer) notFound();
   const jobs = jobResult.data as Job[];
 

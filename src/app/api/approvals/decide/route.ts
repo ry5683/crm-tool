@@ -5,6 +5,7 @@
 import { z } from "zod";
 import { decisionResponse } from "@/lib/approval-decision";
 import { hashApprovalToken, isValidApprovalToken } from "@/lib/approval-token";
+import { DECLINE_REASONS, DECLINE_NOTE_MAX } from "@/lib/decline-reasons";
 import { createClient } from "@/lib/supabase/server";
 
 // What we need from the customer's browser: the secret code from their link, approve or decline, and the name they typed.
@@ -12,6 +13,8 @@ const bodySchema = z.object({
   token: z.string(),
   decision: z.enum(["approved", "declined"]),
   approverName: z.string().trim().min(1).max(120),
+  declineReason: z.enum(DECLINE_REASONS.map((reason) => reason.code) as [string, ...string[]]).optional(),
+  declineNote: z.string().trim().max(DECLINE_NOTE_MAX).optional(),
 });
 
 // POST means "here, take this." Runs every time a customer answers.
@@ -33,6 +36,15 @@ export async function POST(request: Request) {
     return Response.json({ error: "Check the approval details and try again." }, { status: 400 });
   }
 
+  // A decline needs a reason (and a note when the reason is "other"); an approval carries neither.
+  const { decision, declineReason, declineNote } = parsed.data;
+  if (decision === "declined" && (!declineReason || (declineReason === "other" && !declineNote))) {
+    return Response.json({ error: "Please choose a reason for declining." }, { status: 400 });
+  }
+  if (decision === "approved" && (declineReason || declineNote)) {
+    return Response.json({ error: "Check the approval details and try again." }, { status: 400 });
+  }
+
   // Hand the decision to the database. We send only the link's fingerprint (hash), never the link itself,
   // and the database does the real checking: not used already, not expired, not outdated.
   const supabase = await createClient();
@@ -40,6 +52,8 @@ export async function POST(request: Request) {
     p_token_hash: hashApprovalToken(parsed.data.token),
     p_decision: parsed.data.decision,
     p_approver_name: parsed.data.approverName,
+    p_decline_reason: decision === "declined" ? declineReason : null,
+    p_decline_note: decision === "declined" ? declineNote || null : null,
   });
 
   // If the database itself broke, we keep the details private and just give the customer a gentle "try again."

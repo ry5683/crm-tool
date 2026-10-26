@@ -6,6 +6,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { encryptField } from "@/lib/field-crypto";
 
 // What we report back to the form: an error message, or null (nothing) if all went well.
 export type CreateJobState = {
@@ -170,9 +171,9 @@ export async function createJob(
       p_business_id: businessId,
       p_customer_id: isNewCustomer ? null : customerId,
       p_new_customer_name: newCustomer?.name ?? null,
-      p_new_customer_email: newCustomer?.email || null,
-      p_new_customer_phone: newCustomer?.phone || null,
-      p_new_customer_address: newCustomer?.address || null,
+      p_new_customer_email: encryptField(newCustomer?.email || null, "customer.email"),
+      p_new_customer_phone: encryptField(newCustomer?.phone || null, "customer.phone"),
+      p_new_customer_address: encryptField(newCustomer?.address || null, "customer.address"),
       p_job_description: jobResult.data.description,
       p_assigned_tech_id: normalizedTechId,
       p_estimate_lines: jobResult.data.estimateLines.map((line) => ({

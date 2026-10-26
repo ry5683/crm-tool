@@ -91,3 +91,15 @@
 - `/invoices`: totals (Outstanding, Overdue, Paid), filter chips, and a row per job with a billable total (estimate + approved changes). Owners get "Mark paid" / "Undo".
 - Migration `009_invoice_payments.sql` adds `jobs.paid_at`; must be applied or the page errors. Overdue = unpaid and job older than 30 days (`src/lib/invoices.ts`).
 - Mobile nav now has 7 slots (6 tabs + sign out) at 10px labels; check on a real phone.
+
+## Decline reasons and field encryption
+
+- Declines carry a reason (drop-down) plus a note of up to 300 characters (required for "Other"); migration `010_decline_reasons.sql` must be applied. Security headers are set in `next.config.ts`.
+- Customer email, phone and address are encrypted with AES-256-GCM in the server (`src/lib/field-crypto.ts`) before saving, and decrypted after loading. Needs `FIELD_ENCRYPTION_KEY` in `.env.local` (generate: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`). Back this key up and set it in Vercel too; losing it makes the data unreadable.
+- Existing plain-text rows keep working and can be encrypted with `npm run encrypt:existing`.
+
+## 2026-10-26: Security review fixes
+- Built: migration `011_lock_owner_rules.sql`. The database itself now enforces owner-only rules instead of only hiding buttons: only owners mark invoices paid (new `set_job_paid` function; techs can't touch `paid_at`), only owners delete customers and jobs, change-order lines can only be created from the pricebook (no hand-typed prices or totals), and estimates lock once the invoice is paid (and, after a change order is sent, only an owner can edit them).
+- App changes: Mark paid now calls `set_job_paid`. Approval and invite email links use a fixed `APP_URL` (`src/lib/app-url.ts`); in development it falls back to the address you're browsing from.
+- Tested: 011 was applied after 001–010 to a local Postgres copy with a Supabase-like login stub; tech/owner/other-company checks behaved as expected; the file is safe to run twice. TypeScript and ESLint pass.
+- To do: apply 006–011 in Supabase in order; set `APP_URL` in Vercel; make the GitHub repo private; commit; in Supabase turn off public sign-ups, turn on leaked-password protection and backups; back up `FIELD_ENCRYPTION_KEY` in a password manager; run `npm run encrypt:existing`.

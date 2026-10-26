@@ -40,3 +40,17 @@ describe("approval decision responses", () => {
     });
   });
 });
+
+import { declineNoteError } from "../src/lib/decline-reasons";
+
+describe("decline reasons", () => {
+  it("requires a note for 'other'", () => {
+    assert.match(declineNoteError("other", "  ") ?? "", /reason/i);
+    assert.equal(declineNoteError("other", "Changed my mind"), null);
+  });
+
+  it("makes the note optional for listed reasons and caps it at 300", () => {
+    assert.equal(declineNoteError("too_expensive", ""), null);
+    assert.match(declineNoteError("too_expensive", "x".repeat(301)) ?? "", /300/);
+  });
+});

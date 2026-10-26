@@ -7,6 +7,7 @@ import { z } from "zod";
 import { requireSession } from "@/lib/session";
 import CustomerForm from "../../CustomerForm";
 import { updateCustomer } from "../../actions";
+import { decryptContact } from "@/lib/field-crypto";
 
 type EditCustomerPageProps = { params: Promise<{ id: string }> };
 
@@ -20,7 +21,7 @@ export default async function EditCustomerPage({ params }: EditCustomerPageProps
   if (!z.uuid().safeParse(id).success) notFound();
 
   const { supabase } = await requireSession();
-  const { data: customer, error } = await supabase
+  const { data: customerRow, error } = await supabase
     .from("customers")
     .select("id, name, address, email, phone")
     .eq("id", id)
@@ -28,7 +29,8 @@ export default async function EditCustomerPage({ params }: EditCustomerPageProps
   if (error) {
     throw new Error(`Could not load the customer: ${error.message}`);
   }
-  if (!customer) notFound();
+  if (!customerRow) notFound();
+  const customer = decryptContact(customerRow);
 
   return (
     <main className="animate-rise min-h-screen bg-zinc-50 px-4 py-8 sm:px-6 lg:px-8">

@@ -6,6 +6,7 @@ import { connection } from "next/server";
 import type { CSSProperties } from "react";
 import { callHref, formatPhone } from "@/lib/contact";
 import { requireSession } from "@/lib/session";
+import { decryptContact } from "@/lib/field-crypto";
 
 // A customer as stored in the database.
 type Customer = {
@@ -51,7 +52,7 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
   // Search: match the name, email, address or phone digits. Done here in plain code, so odd characters can't upset the database.
   const query = q.trim().toLowerCase();
   const queryDigits = query.replace(/\D/g, "");
-  const allCustomers = customerResult.data as Customer[];
+  const allCustomers = (customerResult.data as Customer[]).map(decryptContact);
   const customers = query
     ? allCustomers.filter(
         (customer) =>

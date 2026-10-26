@@ -9,6 +9,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
 import PrintInvoiceButton from "./PrintInvoiceButton";
+import { decryptContact } from "@/lib/field-crypto";
 
 // The job's ID, which comes from the web address.
 type InvoicePageProps = { params: Promise<{ id: string }> };
@@ -160,7 +161,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
   }
 
   // Label the loaded info with the shapes above.
-  const customer = customerData as Customer;
+  const customer = decryptContact(customerData as Customer);
   const business = businessData as Business;
   const estimateLines = estimateData as InvoiceLine[];
   const changeLines = changeLineData as ChangeOrderLine[];

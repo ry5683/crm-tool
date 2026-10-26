@@ -6,6 +6,8 @@ import { z } from "zod";
 import { createApprovalToken, hashApprovalToken } from "@/lib/approval-token";
 import { sendApprovalRequestEmail } from "@/lib/email";
 import { createClient } from "@/lib/supabase/server";
+import { decryptField } from "@/lib/field-crypto";
+import { appOrigin } from "@/lib/app-url";
 
 // All the browser has to tell us is which change order to send. A uuid is just a long one-of-a-kind ID.
 const bodySchema = z.object({ changeOrderId: z.uuid() });
@@ -87,11 +89,11 @@ export async function POST(request: Request) {
   }
 
   // Build the customer's link. The real secret goes in the link itself; we only keep the fingerprint.
-  const approvalUrl = new URL(`/approve/${token}`, origin).toString();
+  const approvalUrl = new URL(`/approve/${token}`, appOrigin(origin)).toString();
   try {
     // Now actually email the customer the link, what the work is, and the total.
     await sendApprovalRequestEmail({
-      to: requestDetails.customer_email,
+      to: decryptField(requestDetails.customer_email, "customer.email"),
       businessName: requestDetails.business_name,
       description: `${requestDetails.job_description}: ${requestDetails.reason}`,
       totalCents: requestDetails.total_cents,

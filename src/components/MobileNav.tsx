@@ -7,6 +7,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/app/jobs/actions";
+import ThemeToggle from "@/components/ThemeToggle";
 
 // The tabs, in order. "match" decides when a tab should light up as the current one.
 const tabs = [
@@ -91,11 +92,11 @@ export default function MobileNav() {
         aria-label="Main menu"
         className="no-print fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
       >
-        <ul className="relative mx-auto grid max-w-md grid-cols-7">
-          {/* A little blue bar that slides over to whichever tab you're on. Each tab is a seventh of the width. */}
+        <ul className="relative mx-auto grid max-w-md grid-cols-8">
+          {/* A little yellow bar that slides over to whichever tab you're on. */}
           <li
             aria-hidden="true"
-            className="pointer-events-none absolute left-0 top-0 h-0.5 w-1/7 transition-transform duration-300 ease-out"
+            className="pointer-events-none absolute left-0 top-0 h-0.5 w-[12.5%] transition-transform duration-300 ease-out"
             style={{
               transform: `translateX(${Math.max(tabs.findIndex((tab) => tab.match(pathname)), 0) * 100}%)`,
               opacity: tabs.some((tab) => tab.match(pathname)) ? 1 : 0,
@@ -123,6 +124,13 @@ export default function MobileNav() {
               </li>
             );
           })}
+
+          <li>
+            <ThemeToggle
+              className="flex min-h-14 w-full flex-col items-center justify-center gap-1 text-[10px] font-medium text-zinc-500 active:text-zinc-900"
+              label="Theme"
+            />
+          </li>
 
           {/* Sign out is a form button instead of a link, because it has to run our sign-out routine. */}
           <li>

@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { signOut } from "@/app/jobs/actions";
 import Brand from "@/components/Brand";
+import ThemeToggle from "@/components/ThemeToggle";
 
 // The tabs, and the rule for when each one counts as "current".
 const tabs = [
@@ -75,6 +76,9 @@ export default function DesktopNav() {
               width: bar?.width ?? 0,
               opacity: bar ? 1 : 0,
             }}
+          />
+          <ThemeToggle
+            className="ml-1 rounded-md p-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
           />
           <form action={signOut} className="ml-3">
             <button

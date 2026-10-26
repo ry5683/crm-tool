@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import type { CreateJobState } from "../../new/actions";
+import { encryptField } from "@/lib/field-crypto";
 
 // The rules for the customer's details: a name is a must, and email, phone and address are all required too. The phone must look exactly like (555) 123-4567.
 const customerInputSchema = z.object({
@@ -130,9 +131,9 @@ export async function updateJob(
     p_job_id: parsed.data.jobId,
     p_customer_id: parsed.data.customerId,
     p_customer_name: customerResult.data.name,
-    p_customer_email: customerResult.data.email ?? null,
-    p_customer_phone: customerResult.data.phone ?? null,
-    p_customer_address: customerResult.data.address ?? null,
+    p_customer_email: encryptField(customerResult.data.email ?? null, "customer.email"),
+    p_customer_phone: encryptField(customerResult.data.phone ?? null, "customer.phone"),
+    p_customer_address: encryptField(customerResult.data.address ?? null, "customer.address"),
     p_job_description: parsed.data.description,
     p_assigned_tech_id: normalizedTechId,
     p_estimate_lines: parsed.data.estimateLines.map((line) => ({

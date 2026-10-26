@@ -5,8 +5,10 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense, type ReactNode } from "react";
 import { Barlow, Barlow_Semi_Condensed, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import DesktopNav from "@/components/DesktopNav";
 import MobileNav from "@/components/MobileNav";
+import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
 
 // The main font (Barlow) for normal text. It's modeled on highway signs, so it reads well at a glance.
@@ -60,8 +62,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html
       lang="en"
       className={`${barlow.variable} ${barlowCondensed.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
+        <Script src="/theme-init.js" strategy="beforeInteractive" />
+        <Suspense fallback={null}>
+          <ThemeToggle
+            className="theme-toggle-button fixed right-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 bg-white/90 text-zinc-600 shadow-sm backdrop-blur md:h-11 md:w-11"
+            standaloneOnly
+          />
+        </Suspense>
         {/* The top menu for laptops. It hides itself on phones, the sign-in page and customer pages. */}
         <Suspense fallback={null}>
           <DesktopNav />

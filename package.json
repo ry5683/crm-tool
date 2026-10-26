@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "tsx --test tests/*.test.ts",
+    "encrypt:existing": "tsx scripts/encrypt-existing.ts",
     "email:test": "node --conditions=react-server --import tsx scripts/send-test-email.ts"
   },
   "dependencies": {

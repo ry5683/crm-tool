@@ -8,6 +8,7 @@ import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import JobForm from "../../new/JobForm";
 import { updateJob } from "./actions";
+import { decryptContact } from "@/lib/field-crypto";
 
 // Quick descriptions of the info we pull in. A Job is its ID, business, customer, assigned technician and description.
 type Job = {
@@ -115,7 +116,7 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
   }
 
   // Make sure the job's customer is in the list we loaded. If it isn't, something's off, so we show "not found".
-  const customers = customerData as Customer[];
+  const customers = (customerData as Customer[]).map(decryptContact);
   const estimateLines = lineData as EstimateLine[];
   if (!customers.some((customer) => customer.id === job.customer_id)) {
     notFound();

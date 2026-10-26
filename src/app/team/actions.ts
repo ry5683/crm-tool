@@ -10,6 +10,7 @@ import { z } from "zod";
 import { sendTeamInviteEmail } from "@/lib/email";
 import { requireSession } from "@/lib/session";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { appOrigin } from "@/lib/app-url";
 
 // What each action tells the form afterward: an error, a success note, or neither.
 export type TeamActionState = { error: string | null; message: string | null };
@@ -100,7 +101,7 @@ export async function inviteMember(
   }
 
   // Step 3: email them. If that fails we undo steps 1 and 2, so nobody is left half-invited.
-  const inviteUrl = new URL("/auth/confirm", origin);
+  const inviteUrl = new URL("/auth/confirm", appOrigin(origin));
   inviteUrl.searchParams.set("token_hash", link.properties.hashed_token);
   inviteUrl.searchParams.set("type", "invite");
   try {

@@ -4,10 +4,10 @@
 /* Loads Tailwind, a toolkit of ready-made style words that the pages use in their className text. */
 @import "tailwindcss";
 
-/* Basic colors for light mode: white background, near-black text. */
+/* Light mode uses a soft neutral canvas with readable, softened text. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5f6f7;
+  --foreground: #555d66;
 }
 
 /* Tells Tailwind about our color and font choices so they can be used by name. */
@@ -36,11 +36,344 @@
   --color-hivis-950: #3a2700;
 }
 
-/* If the visitor's device is in dark mode, switch to a near-black background and light text. */
+:root[data-theme="dark"] {
+  --background: #191d23;
+  --foreground: #aeb7c2;
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* Preserve the device preference unless the visitor has chosen a theme in the app. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    --background: #191d23;
+    --foreground: #aeb7c2;
+    color-scheme: dark;
+  }
+}
+
+@media screen {
+  :root:not([data-theme="dark"]) {
+    --background: #f5f6f7;
+    --foreground: #555d66;
+  }
+
+  :root:not([data-theme="dark"]) .bg-zinc-50 {
+    background-color: #f5f6f7;
+  }
+
+  :root:not([data-theme="dark"]) .bg-zinc-100 {
+    background-color: #edf0f2;
+  }
+
+  :root:not([data-theme="dark"]) .bg-zinc-200 {
+    background-color: #e5e9ec;
+  }
+
+  :root:not([data-theme="dark"]) .text-zinc-950,
+  :root:not([data-theme="dark"]) .text-zinc-900 {
+    color: #555d66;
+  }
+
+  :root:not([data-theme="dark"]) .text-zinc-800,
+  :root:not([data-theme="dark"]) .text-zinc-700 {
+    color: #555d66;
+  }
+
+  :root:not([data-theme="dark"]) .text-zinc-600 {
+    color: #5c6570;
+  }
+
+  :root:not([data-theme="dark"]) .text-zinc-500 {
+    color: #626b75;
+  }
+
+  :root:not([data-theme="dark"]) .text-zinc-400 {
+    color: #69727c;
+  }
+
+  :root:not([data-theme="dark"]) .border-zinc-100 {
+    border-color: #e8ebee;
+  }
+
+  :root:not([data-theme="dark"]) .border-zinc-200 {
+    border-color: #dce1e5;
+  }
+
+  :root:not([data-theme="dark"]) .border-zinc-300 {
+    border-color: #cbd2d9;
+  }
+
+  :root:not([data-theme="dark"]) .border-zinc-900 {
+    border-color: #626b75;
+  }
+
+  :root:not([data-theme="dark"]) input.border-zinc-300,
+  :root:not([data-theme="dark"]) select.border-zinc-300,
+  :root:not([data-theme="dark"]) textarea.border-zinc-300 {
+    border-color: #8c959f;
+  }
+
+  :root:not([data-theme="dark"]) input.border-zinc-300:focus,
+  :root:not([data-theme="dark"]) select.border-zinc-300:focus,
+  :root:not([data-theme="dark"]) textarea.border-zinc-300:focus {
+    --tw-ring-color: #a99156;
+    border-color: #626b75;
+  }
+
+  :root:not([data-theme="dark"]) .bg-hivis-400,
+  :root:not([data-theme="dark"]) [class~="hover:bg-hivis-500"]:hover {
+    color: #29271f;
+  }
+
+  :root:not([data-theme="dark"]) .bg-blue-50 {
+    background-color: #eff4f8;
+  }
+
+  :root:not([data-theme="dark"]) .text-blue-800 {
+    color: #3b566d;
+  }
+
+  :root:not([data-theme="dark"]) .bg-green-50 {
+    background-color: #eef5f0;
+  }
+
+  :root:not([data-theme="dark"]) .text-green-800,
+  :root:not([data-theme="dark"]) .text-green-900 {
+    color: #3f6149;
+  }
+
+  :root:not([data-theme="dark"]) .bg-red-50 {
+    background-color: #fbefef;
+  }
+
+  :root:not([data-theme="dark"]) .bg-red-100 {
+    background-color: #f7e9e9;
+  }
+
+  :root:not([data-theme="dark"]) .text-red-600,
+  :root:not([data-theme="dark"]) .text-red-700,
+  :root:not([data-theme="dark"]) .text-red-800,
+  :root:not([data-theme="dark"]) .text-red-900 {
+    color: #8d4141;
+  }
+
+  :root:not([data-theme="dark"]) .bg-amber-50,
+  :root:not([data-theme="dark"]) .bg-amber-100 {
+    background-color: #f8f2e7;
+  }
+
+  :root:not([data-theme="dark"]) .text-amber-700,
+  :root:not([data-theme="dark"]) .text-amber-800,
+  :root:not([data-theme="dark"]) .text-amber-950 {
+    color: #705925;
+  }
+
+  :root:not([data-theme="dark"]) .bg-emerald-100 {
+    background-color: #edf4ef;
+  }
+
+  :root:not([data-theme="dark"]) .text-emerald-700,
+  :root:not([data-theme="dark"]) .text-emerald-800 {
+    color: #3f6149;
+  }
+
+  :root:not([data-theme="dark"]) .border-red-300 {
+    border-color: #b18a8a;
+  }
+
+  :root:not([data-theme="dark"]) .border-amber-200 {
+    border-color: #a38e64;
+  }
+
+  :root:not([data-theme="dark"]) .bg-red-600 {
+    background-color: #ad5757;
+  }
+
+  :root:not([data-theme="dark"]) .bg-red-700 {
+    background-color: #9f5050;
+  }
+
+  :root:not([data-theme="dark"]) .bg-red-800 {
+    background-color: #854444;
+  }
+
+  :root:not([data-theme="dark"]) .bg-green-700,
+  :root:not([data-theme="dark"]) .bg-emerald-600 {
+    background-color: #3f6149;
+  }
+
+  :root:not([data-theme="dark"]) .bg-green-800,
+  :root:not([data-theme="dark"]) .bg-emerald-700 {
+    background-color: #314f3b;
+  }
+
+  :root:not([data-theme="dark"]) .bg-zinc-900 {
+    background-color: #555d66;
+  }
+
+  :root[data-theme="dark"] .bg-white,
+  :root[data-theme="dark"] [class~="bg-white/80"],
+  :root[data-theme="dark"] [class~="bg-white/95"],
+  :root[data-theme="dark"] .theme-toggle-button {
+    background-color: #222831;
+  }
+
+  :root[data-theme="dark"] .bg-zinc-50 {
+    background-color: #191d23;
+  }
+
+  :root[data-theme="dark"] .bg-zinc-100,
+  :root[data-theme="dark"] .bg-zinc-200 {
+    background-color: #2b323b;
+  }
+
+  :root[data-theme="dark"] .text-zinc-950,
+  :root[data-theme="dark"] .text-zinc-900 {
+    color: #aeb7c2;
+  }
+
+  :root[data-theme="dark"] .text-zinc-800,
+  :root[data-theme="dark"] .text-zinc-700 {
+    color: #a4adb8;
+  }
+
+  :root[data-theme="dark"] .text-zinc-600 {
+    color: #9da7b2;
+  }
+
+  :root[data-theme="dark"] .text-zinc-500 {
+    color: #98a2ae;
+  }
+
+  :root[data-theme="dark"] .text-zinc-400 {
+    color: #929daa;
+  }
+
+  :root[data-theme="dark"] .border-zinc-100,
+  :root[data-theme="dark"] .border-zinc-200,
+  :root[data-theme="dark"] .border-zinc-300 {
+    border-color: #3a434e;
+  }
+
+  :root[data-theme="dark"] .border-zinc-900 {
+    border-color: #cbb56b;
+  }
+
+  :root[data-theme="dark"] input.border-zinc-300,
+  :root[data-theme="dark"] select.border-zinc-300,
+  :root[data-theme="dark"] textarea.border-zinc-300 {
+    border-color: #687380;
+  }
+
+  :root[data-theme="dark"] input.border-zinc-300:focus,
+  :root[data-theme="dark"] select.border-zinc-300:focus,
+  :root[data-theme="dark"] textarea.border-zinc-300:focus {
+    --tw-ring-color: #cbb56b;
+    border-color: #cbb56b;
+  }
+
+  :root[data-theme="dark"] .bg-hivis-400,
+  :root[data-theme="dark"] [class~="hover:bg-hivis-500"]:hover {
+    color: #29271f;
+  }
+
+  :root[data-theme="dark"] .bg-blue-50 {
+    background-color: #293744;
+  }
+
+  :root[data-theme="dark"] .text-blue-800 {
+    color: #c0d0dc;
+  }
+
+  :root[data-theme="dark"] .bg-green-50 {
+    background-color: #2d3b33;
+  }
+
+  :root[data-theme="dark"] .text-green-800,
+  :root[data-theme="dark"] .text-green-900 {
+    color: #c0d0c5;
+  }
+
+  :root[data-theme="dark"] .bg-red-50,
+  :root[data-theme="dark"] .bg-red-100 {
+    background-color: #443033;
+  }
+
+  :root[data-theme="dark"] .text-red-600,
+  :root[data-theme="dark"] .text-red-700,
+  :root[data-theme="dark"] .text-red-800,
+  :root[data-theme="dark"] .text-red-900 {
+    color: #e0bfc2;
+  }
+
+  :root[data-theme="dark"] .bg-amber-50,
+  :root[data-theme="dark"] .bg-amber-100 {
+    background-color: #443c2e;
+  }
+
+  :root[data-theme="dark"] .text-amber-700,
+  :root[data-theme="dark"] .text-amber-800,
+  :root[data-theme="dark"] .text-amber-950 {
+    color: #dfd0a6;
+  }
+
+  :root[data-theme="dark"] .bg-emerald-100 {
+    background-color: #2d3b33;
+  }
+
+  :root[data-theme="dark"] .text-emerald-700,
+  :root[data-theme="dark"] .text-emerald-800 {
+    color: #c0d0c5;
+  }
+
+  :root[data-theme="dark"] .border-red-300 {
+    border-color: #8d696e;
+  }
+
+  :root[data-theme="dark"] .border-amber-200 {
+    border-color: #887951;
+  }
+
+  :root[data-theme="dark"] .bg-red-600 {
+    background-color: #9f555b;
+  }
+
+  :root[data-theme="dark"] .bg-red-700 {
+    background-color: #82484d;
+  }
+
+  :root[data-theme="dark"] .bg-red-800 {
+    background-color: #713f43;
+  }
+
+  :root[data-theme="dark"] .bg-green-700,
+  :root[data-theme="dark"] .bg-emerald-600 {
+    background-color: #3f6149;
+  }
+
+  :root[data-theme="dark"] .bg-green-800,
+  :root[data-theme="dark"] .bg-emerald-700 {
+    background-color: #314f3b;
+  }
+
+  :root[data-theme="dark"] .bg-zinc-900 {
+    background-color: #3a434e;
+  }
+
+  :root[data-theme="dark"] .text-black {
+    color: #aeb7c2;
+  }
+
+  :root[data-theme="dark"] .skeleton {
+    background: linear-gradient(90deg, #2b323b 25%, #3a434e 50%, #2b323b 75%);
+  }
+
+  :root[data-theme="dark"] :focus-visible {
+    outline-color: #cbb56b;
   }
 }
 
@@ -177,6 +510,48 @@ button:not(:disabled):active {
   transform: scale(0.97);
 }
 
+.theme-toggle-icon {
+  display: inline-grid;
+  flex: none;
+  height: 1.25rem;
+  place-items: center;
+  position: relative;
+  width: 1.25rem;
+}
+
+.theme-toggle-icon svg {
+  grid-area: 1 / 1;
+  height: 100%;
+  transition:
+    opacity 0.2s ease,
+    transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+  width: 100%;
+}
+
+.theme-toggle-sun {
+  opacity: 1;
+  transform: rotate(0) scale(1);
+}
+
+.theme-toggle-moon {
+  opacity: 0;
+  transform: rotate(-70deg) scale(0.55);
+}
+
+:root[data-theme="dark"] .theme-toggle-icon[data-dark="true"] {
+  color: #ffc20e;
+}
+
+.theme-toggle-icon[data-dark="true"] .theme-toggle-sun {
+  opacity: 0;
+  transform: rotate(70deg) scale(0.55);
+}
+
+.theme-toggle-icon[data-dark="true"] .theme-toggle-moon {
+  opacity: 1;
+  transform: rotate(0) scale(1);
+}
+
 /* Phones flash a grey box over anything tapped. We hide that because our buttons and cards show their own press. */
 html {
   -webkit-tap-highlight-color: transparent;
@@ -204,7 +579,7 @@ html {
 
 /* A clear, dark ring around whatever you're tabbing to or tapping into. (Yellow would vanish on white.) */
 :focus-visible {
-  outline: 2px solid #18181b;
+  outline: 2px solid #626b75;
   outline-offset: 2px;
 }
 
@@ -216,6 +591,10 @@ html {
     animation-delay: 0ms !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .theme-toggle-icon svg {
+    transition: none;
   }
 }
 
