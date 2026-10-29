@@ -96,3 +96,54 @@ export function parseQuantityToMilli(value: string): number | null {
   }
   return quantity * 1_000;
 }
+
+// ---------------------------------------------------------------------------
+// Sales tax
+// ---------------------------------------------------------------------------
+
+// Tax rates are stored in thousandths of a percent, the same whole-number idea as cents:
+// 7.75% is 7750, 7.875% is 7875. The highest rate we allow is 20% (20000).
+export const MAX_TAX_RATE_MILLIPERCENT = 20_000;
+
+// Tax on a taxable amount, rounded to the nearest cent (half a cent rounds up).
+// Example: $175.00 at 7.75% → 17500 × 7750 / 100000 = 1356.25 → 1356 cents ($13.56).
+export function taxCents(taxableSubtotalCents: number, rateMilliPercent: number): number {
+  if (!Number.isSafeInteger(taxableSubtotalCents) || taxableSubtotalCents < 0) {
+    throw new RangeError("Taxable amount must be a whole, non-negative number of cents.");
+  }
+  if (
+    !Number.isInteger(rateMilliPercent) ||
+    rateMilliPercent < 0 ||
+    rateMilliPercent > MAX_TAX_RATE_MILLIPERCENT
+  ) {
+    throw new RangeError("Tax rate must be between 0% and 20%.");
+  }
+  const tax =
+    (BigInt(taxableSubtotalCents) * BigInt(rateMilliPercent) + BigInt(50_000)) /
+    BigInt(100_000);
+  return Number(tax);
+}
+
+// Turns a typed rate like "7.75" (percent) into 7750. Returns null if it isn't a valid rate.
+export function parseTaxRate(value: string): number | null {
+  const scaled = parseDecimalToScaledInteger(value.trim(), 3);
+  return scaled !== null && scaled <= MAX_TAX_RATE_MILLIPERCENT ? scaled : null;
+}
+
+// Shows a stored rate as a percent without trailing zeros: 7750 → "7.75%", 8000 → "8%".
+export function formatTaxRate(rateMilliPercent: number): string {
+  const whole = Math.floor(rateMilliPercent / 1_000);
+  const fraction = String(rateMilliPercent % 1_000).padStart(3, "0").replace(/0+$/, "");
+  return fraction ? `${whole}.${fraction}%` : `${whole}%`;
+}
+
+// Everything an invoice needs from its lines: subtotal, the part that's taxable, the tax, and the total.
+export function invoiceTotals(
+  lines: ReadonlyArray<{ quantityMilli: number; unitPriceCents: number; taxable: boolean }>,
+  rateMilliPercent: number,
+): { subtotalCents: number; taxableCents: number; taxCents: number; totalCents: number } {
+  const subtotalCents = totalCents(lines);
+  const taxableCents = totalCents(lines.filter((line) => line.taxable));
+  const tax = taxCents(taxableCents, rateMilliPercent);
+  return { subtotalCents, taxableCents, taxCents: tax, totalCents: subtotalCents + tax };
+}

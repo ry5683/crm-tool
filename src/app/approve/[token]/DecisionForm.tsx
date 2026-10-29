@@ -14,6 +14,7 @@ import {
   type DeclineReasonCode,
 } from "@/lib/decline-reasons";
 import { useState } from "react";
+import SignaturePad from "@/components/SignaturePad";
 
 // Only two answers are allowed.
 type Decision = "approved" | "declined";
@@ -29,6 +30,8 @@ export default function DecisionForm({ token }: { token: string }) {
   const [declining, setDeclining] = useState(false);
   const [reason, setReason] = useState<DeclineReasonCode | "">("");
   const [note, setNote] = useState("");
+  // The drawn signature as a picture (text form). Needed to approve, not to decline.
+  const [signature, setSignature] = useState<string | null>(null);
 
   // This runs when a button gets pressed. It sends the answer to the server and then shows what happened.
   async function submit(selectedDecision: Decision) {
@@ -44,6 +47,11 @@ export default function DecisionForm({ token }: { token: string }) {
       }
     }
     // Wipe any old error, and mark ourselves busy so nobody double-taps.
+    if (selectedDecision === "approved" && !signature) {
+      setError("Please sign in the box to approve.");
+      return;
+    }
+
     setError(null);
     setIsPending(true);
     try {
@@ -56,6 +64,7 @@ export default function DecisionForm({ token }: { token: string }) {
           decision: selectedDecision,
           approverName,
           ...(selectedDecision === "declined" && { declineReason: reason, declineNote: note.trim() }),
+          ...(selectedDecision === "approved" && { signature }),
         }),
       });
       const result = (await response.json()) as { status?: string; error?: string };
@@ -177,11 +186,18 @@ export default function DecisionForm({ token }: { token: string }) {
           </div>
         </div>
       ) : (
-        /* Approve and Decline. Both stay greyed out until there's a name or while a send is in progress. */
+        /* Signature, then Approve and Decline. Approve also waits for a signature. */
+        <div className="space-y-4">
+        <div>
+          <p className="mb-2 block text-sm font-medium text-zinc-800">
+            Sign to approve <span className="font-normal text-zinc-500">(not needed to decline)</span>
+          </p>
+          <SignaturePad disabled={isPending} onChange={setSignature} />
+        </div>
         <div className="flex flex-col gap-3 sm:flex-row">
           <button
             className="rounded-lg bg-green-700 px-5 py-3 font-medium text-white hover:bg-green-800 disabled:opacity-60"
-            disabled={isPending || !approverName.trim()}
+            disabled={isPending || !approverName.trim() || !signature}
             onClick={() => submit("approved")}
             type="button"
           >
@@ -195,6 +211,7 @@ export default function DecisionForm({ token }: { token: string }) {
           >
             Decline
           </button>
+        </div>
         </div>
       )}
     </div>

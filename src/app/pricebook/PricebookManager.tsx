@@ -9,10 +9,11 @@ import { useActionState } from "react";
 import {
   createPricebookItem,
   deletePricebookItem,
+  setTaxRate,
   updatePricebookItem,
   type PricebookActionState,
 } from "./actions";
-import { formatCents } from "@/lib/money";
+import { formatCents, formatTaxRate } from "@/lib/money";
 
 // One price book entry: its ID, name, unit (like "each") and price in cents.
 type PricebookItem = {
@@ -20,6 +21,7 @@ type PricebookItem = {
   name: string;
   unit: string;
   price_cents: number;
+  taxable: boolean;
 };
 
 // Where every form starts: no error yet.
@@ -50,7 +52,7 @@ function ItemEditor({ item }: { item: PricebookItem }) {
   return (
     <article className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
       {/* The edit form: name, unit and price boxes, plus a Save button. */}
-      <form action={updateAction} className="grid gap-4 sm:grid-cols-[1fr_9rem_9rem_auto]">
+      <form action={updateAction} className="grid gap-4 sm:grid-cols-[1fr_9rem_9rem_auto_auto]">
         {/* A hidden box carrying the item's ID so the server knows which one you're editing. */}
         <input name="id" type="hidden" value={item.id} />
         {/* The item name, already filled in. */}
@@ -92,6 +94,7 @@ function ItemEditor({ item }: { item: PricebookItem }) {
             Current: {formatCents(item.price_cents)}
           </span>
         </label>
+        <TaxableCheckbox defaultChecked={item.taxable} />
         {/* The Save button. */}
         <button
           className="self-end rounded-lg bg-hivis-400 px-4 py-2 font-semibold text-zinc-950 hover:bg-hivis-500 disabled:opacity-60"
@@ -121,12 +124,78 @@ function ItemEditor({ item }: { item: PricebookItem }) {
 }
 
 // The whole pricebook area. "canEdit" is only true for business owners; everyone else just gets a read-only list.
+// The "Taxable" checkbox, used on both the add and edit forms.
+// Checked = sales tax is added on the invoice. Parts are usually taxable; labor usually isn't.
+function TaxableCheckbox({ defaultChecked }: { defaultChecked: boolean }) {
+  return (
+    <label className="flex items-center gap-2 self-end py-2 text-sm font-medium text-zinc-700">
+      <input
+        className="h-5 w-5 accent-zinc-900"
+        defaultChecked={defaultChecked}
+        name="taxable"
+        type="checkbox"
+      />
+      Taxable
+      <span className="font-normal text-zinc-500">(parts yes, labor no)</span>
+    </label>
+  );
+}
+
+// The business's sales tax rate. Owners can change it; techs just see it.
+function TaxRateSection({
+  canEdit,
+  taxRateMilliPercent,
+}: {
+  canEdit: boolean;
+  taxRateMilliPercent: number;
+}) {
+  const [state, action, isSaving] = useActionState(setTaxRate, initialState);
+
+  return (
+    <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <h2 className="text-lg font-semibold text-zinc-950">Sales tax</h2>
+      <p className="mt-1 text-sm text-zinc-600">
+        Added on invoices to taxable items only. Current rate:{" "}
+        <strong className="text-zinc-950">{formatTaxRate(taxRateMilliPercent)}</strong>
+        {taxRateMilliPercent === 0 && canEdit ? " — set your rate so invoices include tax." : ""}
+      </p>
+      {canEdit && (
+        <form action={action} className="mt-4 flex flex-wrap items-end gap-3">
+          <label className="text-sm font-medium text-zinc-700">
+            Tax rate (%) <FieldTag required />
+            <input
+              className="mt-1 block w-32 rounded-lg border border-zinc-300 px-3 py-2"
+              defaultValue={(taxRateMilliPercent / 1000).toString()}
+              inputMode="decimal"
+              name="taxRate"
+              pattern="[0-9]+([.][0-9]{1,3})?"
+              required
+              title="Enter a percent with up to three decimal places, like 7.75."
+              type="text"
+            />
+          </label>
+          <button
+            className="rounded-lg bg-hivis-400 px-4 py-2 font-semibold text-zinc-950 hover:bg-hivis-500 disabled:opacity-60"
+            disabled={isSaving}
+            type="submit"
+          >
+            {isSaving ? "Saving..." : "Save rate"}
+          </button>
+        </form>
+      )}
+      <ActionError error={state.error} />
+    </section>
+  );
+}
+
 export default function PricebookManager({
   items,
   canEdit,
+  taxRateMilliPercent,
 }: {
   items: PricebookItem[];
   canEdit: boolean;
+  taxRateMilliPercent: number;
 }) {
   // Remembers how the "Add" form turned out.
   const [createState, createAction, isCreating] = useActionState(
@@ -137,6 +206,7 @@ export default function PricebookManager({
   // Draw the page body.
   return (
     <div className="mt-8 space-y-8">
+      <TaxRateSection canEdit={canEdit} taxRateMilliPercent={taxRateMilliPercent} />
       {/* The "Add an item" form. Only owners see it. */}
       {canEdit && (
         <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
@@ -179,6 +249,9 @@ export default function PricebookManager({
               />
             </label>
             <div className="sm:col-span-3">
+              <TaxableCheckbox defaultChecked />
+            </div>
+            <div className="sm:col-span-3">
               {/* The Add button. */}
               <button
                 className="rounded-lg bg-hivis-400 px-4 py-2 font-semibold text-zinc-950 hover:bg-hivis-500 disabled:opacity-60"
@@ -215,7 +288,9 @@ export default function PricebookManager({
               >
                 <div>
                   <h3 className="font-medium text-zinc-950">{item.name}</h3>
-                  <p className="text-sm text-zinc-600">Per {item.unit}</p>
+                  <p className="text-sm text-zinc-600">
+                    Per {item.unit} · {item.taxable ? "Taxable" : "Not taxed"}
+                  </p>
                 </div>
                 <p className="font-semibold text-zinc-950">
                   {formatCents(item.price_cents)}

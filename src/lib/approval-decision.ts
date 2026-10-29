@@ -21,6 +21,12 @@ export function decisionResponse(status: string | undefined): DecisionResponse {
     };
   }
   // The link's too old (410 means "gone").
+  if (status === "signature_required") {
+    return {
+      status: 400,
+      body: { status, error: "Please sign in the box to approve." },
+    };
+  }
   if (status === "expired") {
     return {
       status: 410,

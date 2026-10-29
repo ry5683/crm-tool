@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { parseTaxRate } from "@/lib/money";
 
 // What each action tells the form afterward: an error message, or null if all went well.
 export type PricebookActionState = { error: string | null };
@@ -28,6 +29,8 @@ const pricebookItemInputSchema = z.object({
     },
     z.number().int().positive().max(2_147_483_647),
   ),
+  // Whether sales tax applies to this item. Parts usually yes, labor usually no.
+  taxable: z.boolean(),
 });
 
 // Same rules, plus the ID of the item being edited.
@@ -105,6 +108,7 @@ export async function createPricebookItem(
     name: field(formData, "name"),
     unit: field(formData, "unit"),
     priceCents: field(formData, "price"),
+    taxable: formData.get("taxable") === "on",
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Check the item details." };
@@ -122,6 +126,7 @@ export async function createPricebookItem(
     name: parsed.data.name,
     unit: parsed.data.unit,
     price_cents: parsed.data.priceCents,
+    taxable: parsed.data.taxable,
   });
   if (error) {
     return { error: `Could not add the item: ${error.message}` };
@@ -143,6 +148,7 @@ export async function updatePricebookItem(
     name: field(formData, "name"),
     unit: field(formData, "unit"),
     priceCents: field(formData, "price"),
+    taxable: formData.get("taxable") === "on",
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Check the item details." };
@@ -162,6 +168,7 @@ export async function updatePricebookItem(
       name: item.name,
       unit: item.unit,
       price_cents: item.priceCents,
+      taxable: item.taxable,
     })
     .eq("business_id", context.businessId)
     .eq("id", id)
@@ -216,5 +223,34 @@ export async function deletePricebookItem(
 
   // Refresh the pricebook page.
   revalidatePath("/pricebook");
+  return { error: null };
+}
+
+// Owners set the business's sales tax rate here, typed as a percent like 7.75.
+// The database routine (migration 012) checks again that you're an owner, so this can't be done around the app.
+export async function setTaxRate(
+  _previousState: PricebookActionState,
+  formData: FormData,
+): Promise<PricebookActionState> {
+  const rate = parseTaxRate(field(formData, "taxRate"));
+  if (rate === null) {
+    return { error: "Enter a tax rate between 0 and 20, like 7.75 (up to three decimal places)." };
+  }
+
+  const context = await getOwnerContext();
+  if ("error" in context) {
+    return context;
+  }
+
+  const { error } = await context.supabase.rpc("set_business_tax_rate", {
+    p_tax_rate_millipercent: rate,
+  });
+  if (error) {
+    return { error: `Could not save the tax rate: ${error.message}` };
+  }
+
+  revalidatePath("/pricebook");
+  revalidatePath("/invoices");
+  revalidatePath("/jobs", "layout");
   return { error: null };
 }

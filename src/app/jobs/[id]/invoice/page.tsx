@@ -3,13 +3,14 @@
 
 // Borrowed tools: the line item table, money helpers, our login/database connection (Supabase), links, "not found" and redirect helpers, and the print button.
 import LineItems from "@/components/LineItems";
-import { formatCents, totalCents } from "@/lib/money";
+import { formatCents, formatTaxRate, invoiceTotals, totalCents } from "@/lib/money";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
 import PrintInvoiceButton from "./PrintInvoiceButton";
 import { decryptContact } from "@/lib/field-crypto";
+import { SIGNATURE_BUCKET, signedLinks } from "@/lib/storage";
 
 // The job's ID, which comes from the web address.
 type InvoicePageProps = { params: Promise<{ id: string }> };
@@ -20,6 +21,8 @@ type Job = {
   customer_id: string;
   description: string;
   created_at: string;
+  // The tax rate frozen when the job was marked paid; empty means "use the business's current rate".
+  tax_rate_millipercent: number | null;
 };
 // The customer's name and contact info. Some of it might be missing.
 type Customer = {
@@ -34,6 +37,7 @@ type InvoiceLine = {
   description: string;
   quantity_milli: number;
   unit_price_cents: number;
+  taxable: boolean;
 };
 // A change order the customer approved: its reason, version number and saved total.
 type ApprovedChangeOrder = {
@@ -51,9 +55,10 @@ type Approval = {
   approver_name: string;
   decided_at: string;
   decision: string;
+  signature_path: string | null;
 };
 // Your plumbing business, just its name.
-type Business = { name: string };
+type Business = { name: string; tax_rate_millipercent: number };
 
 // A Next.js setting. It tells the framework not to nag about this page's loading speed, since it waits on live data from our server.
 export const instant = false;
@@ -77,7 +82,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
   // Look up the job. If it's not there (or isn't yours to see), we show a "not found" page.
   const { data: jobData, error: jobError } = await supabase
     .from("jobs")
-    .select("id, business_id, customer_id, description, created_at")
+    .select("id, business_id, customer_id, description, created_at, tax_rate_millipercent")
     .eq("id", id)
     .maybeSingle();
 
@@ -104,12 +109,12 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
       .maybeSingle(),
     supabase
       .from("businesses")
-      .select("name")
+      .select("name, tax_rate_millipercent")
       .eq("id", job.business_id)
       .maybeSingle(),
     supabase
       .from("estimate_lines")
-      .select("id, description, quantity_milli, unit_price_cents")
+      .select("id, description, quantity_milli, unit_price_cents, taxable")
       .eq("business_id", job.business_id)
       .eq("job_id", job.id)
       .order("created_at", { ascending: true }),
@@ -136,13 +141,13 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
       ? await Promise.all([
           supabase
             .from("change_order_lines")
-            .select("id, change_order_id, description, quantity_milli, unit_price_cents")
+            .select("id, change_order_id, description, quantity_milli, unit_price_cents, taxable")
             .eq("business_id", job.business_id)
             .in("change_order_id", changeOrderIds)
             .order("created_at", { ascending: true }),
           supabase
             .from("approvals")
-            .select("change_order_id, version, approver_name, decided_at, decision")
+            .select("change_order_id, version, approver_name, decided_at, decision, signature_path")
             .eq("business_id", job.business_id)
             .in("change_order_id", changeOrderIds)
             .eq("decision", "approved"),
@@ -167,6 +172,11 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
   const changeLines = changeLineData as ChangeOrderLine[];
   const approvals = approvalData as Approval[];
   // Build a quick way to find an approval by change order and version.
+  // The customers' signatures (migration 013), shown through short-lived private links.
+  const signatureLinks = await signedLinks(
+    SIGNATURE_BUCKET,
+    approvals.flatMap((approval) => (approval.signature_path ? [approval.signature_path] : [])),
+  );
   const approvalByChangeOrder = new Map(
     approvals.map((approval) => [
       `${approval.change_order_id}:${approval.version}`,
@@ -212,18 +222,26 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
     })),
   );
   // The invoice total is the estimate plus every line from the approved change orders.
-  const invoiceTotal = totalCents([
-    ...estimateLines.map((line) => ({
-      quantityMilli: line.quantity_milli,
-      unitPriceCents: line.unit_price_cents,
-    })),
-    ...approvedChanges.flatMap((changeOrder) =>
-      changeOrder.lines.map((line) => ({
+  // Sales tax: a paid invoice keeps the rate it was paid at; otherwise use today's business rate.
+  const taxRate = job.tax_rate_millipercent ?? business.tax_rate_millipercent;
+  const totals = invoiceTotals(
+    [
+      ...estimateLines.map((line) => ({
         quantityMilli: line.quantity_milli,
         unitPriceCents: line.unit_price_cents,
+        taxable: line.taxable,
       })),
-    ),
-  ]);
+      ...approvedChanges.flatMap((changeOrder) =>
+        changeOrder.lines.map((line) => ({
+          quantityMilli: line.quantity_milli,
+          unitPriceCents: line.unit_price_cents,
+          taxable: line.taxable,
+        })),
+      ),
+    ],
+    taxRate,
+  );
+  const invoiceTotal = totals.totalCents;
 
   // Now we draw the page.
   return (
@@ -291,7 +309,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
             <LineItems
               lines={estimateLines.map((line) => ({
                 id: line.id,
-                description: line.description,
+                description: line.taxable ? line.description : `${line.description} (not taxed)`,
                 quantityMilli: line.quantity_milli,
                 unitPriceCents: line.unit_price_cents,
               }))}
@@ -314,11 +332,20 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
                   Approved by {changeOrder.approval.approver_name} on{" "}
                   {new Date(changeOrder.approval.decided_at).toLocaleDateString("en-US")}
                 </p>
+                {changeOrder.approval.signature_path &&
+                  signatureLinks.get(changeOrder.approval.signature_path) && (
+                    // eslint-disable-next-line @next/next/no-img-element -- short-lived private link
+                    <img
+                      alt={`Signature of ${changeOrder.approval.approver_name}`}
+                      className="mt-2 h-16 w-auto"
+                      src={signatureLinks.get(changeOrder.approval.signature_path)}
+                    />
+                  )}
               </div>
               <LineItems
                 lines={changeOrder.lines.map((line) => ({
                   id: line.id,
-                  description: line.description,
+                  description: line.taxable ? line.description : `${line.description} (not taxed)`,
                   quantityMilli: line.quantity_milli,
                   unitPriceCents: line.unit_price_cents,
                 }))}
@@ -328,14 +355,26 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
           ))}
 
           {/* The grand total. */}
-          <footer className="flex justify-between gap-4 pt-6 text-xl font-bold text-zinc-950">
+          {/* Subtotal, sales tax (taxable lines only), then the grand total. */}
+          <dl className="space-y-1 pt-6 text-sm text-zinc-700">
+            <div className="flex justify-between gap-4">
+              <dt>Subtotal</dt>
+              <dd>{formatCents(totals.subtotalCents)}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt>
+                Sales tax ({formatTaxRate(taxRate)} on {formatCents(totals.taxableCents)} taxable)
+              </dt>
+              <dd>{formatCents(totals.taxCents)}</dd>
+            </div>
+          </dl>
+          <footer className="mt-3 flex justify-between gap-4 border-t border-zinc-200 pt-3 text-xl font-bold text-zinc-950">
             <span>Invoice total</span>
             <span>{formatCents(invoiceTotal)}</span>
           </footer>
-          {/* The breakdown: original estimate versus approved extra work. */}
           <p className="mt-3 text-right text-sm text-zinc-600">
             Original estimate: {formatCents(estimateTotal)} · Approved additional
-            work: {formatCents(invoiceTotal - estimateTotal)}
+            work: {formatCents(totals.subtotalCents - estimateTotal)}
           </p>
         </article>
       </div>

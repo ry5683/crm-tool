@@ -33,7 +33,7 @@ type InitialJob = {
   customerId: string;
   description: string;
   assignedTechId: string | null;
-  lines: { description: string; quantity: string; unitPrice: string }[];
+  lines: { description: string; quantity: string; unitPrice: string; taxable: boolean }[];
 };
 
 // A technician you can assign to the job.
@@ -47,6 +47,8 @@ type DraftLine = {
   description: string;
   quantity: string;
   unitPrice: string;
+  // Whether sales tax applies to this line (parts usually yes, labor usually no).
+  taxable: boolean;
 };
 
 // When the form first loads, there's no error to show.
@@ -79,7 +81,7 @@ export default function JobForm({
   const [lines, setLines] = useState<DraftLine[]>(
     initial && initial.lines.length > 0
       ? initial.lines.map((line, index) => ({ key: index, ...line }))
-      : [{ key: 0, description: "", quantity: "1", unitPrice: "" }],
+      : [{ key: 0, description: "", quantity: "1", unitPrice: "", taxable: true }],
   );
   const [nextLineKey, setNextLineKey] = useState(initial?.lines.length || 1);
   // Figure out whether to show the "new customer" boxes, and which existing customer is picked.
@@ -91,6 +93,7 @@ export default function JobForm({
     description: line.description,
     quantityMilli: parseQuantityToMilli(line.quantity),
     unitPriceCents: parseDecimalToScaledInteger(line.unitPrice, 2),
+    taxable: line.taxable,
   }));
 
   // Keep just the lines that have a usable quantity and price, so a half-typed line doesn't mess up the total.
@@ -114,7 +117,18 @@ export default function JobForm({
   }
 
   // Changes one box (description, quantity or price) on one line as you type.
-  function updateLine(key: number, field: keyof Omit<DraftLine, "key">, value: string) {
+  // Ticks or unticks the Taxable box on one line.
+  function setLineTaxable(key: number, taxable: boolean) {
+    setLines((currentLines) =>
+      currentLines.map((line) => (line.key === key ? { ...line, taxable } : line)),
+    );
+  }
+
+  function updateLine(
+    key: number,
+    field: "description" | "quantity" | "unitPrice",
+    value: string,
+  ) {
     setLines((currentLines) =>
       currentLines.map((line) =>
         line.key === key ? { ...line, [field]: value } : line,
@@ -410,6 +424,17 @@ export default function JobForm({
                 />
               </div>
             </div>
+            {/* Taxable checkbox: ticked means sales tax is added to this line on the invoice. */}
+            <label className="flex items-center gap-2 text-sm font-medium text-zinc-800">
+              <input
+                checked={line.taxable}
+                className="h-5 w-5 accent-zinc-900"
+                onChange={(event) => setLineTaxable(line.key, event.target.checked)}
+                type="checkbox"
+              />
+              Taxable
+              <span className="font-normal text-zinc-500">(untick for labor)</span>
+            </label>
             {/* This line's total (quantity times price) on one side, Remove on the other. */}
             <div className="flex items-center justify-between gap-3 text-sm">
               <p className="text-zinc-600">
@@ -448,7 +473,7 @@ export default function JobForm({
           onClick={() => {
             setLines((currentLines) => [
               ...currentLines,
-              { key: nextLineKey, description: "", quantity: "1", unitPrice: "" },
+              { key: nextLineKey, description: "", quantity: "1", unitPrice: "", taxable: true },
             ]);
             setNextLineKey((key) => key + 1);
           }}

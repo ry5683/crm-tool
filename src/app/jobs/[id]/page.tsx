@@ -16,6 +16,8 @@ import StatusBadge, {
 import SendApprovalButton from "./SendApprovalButton";
 import DeleteJobButton from "./DeleteJobButton";
 import { decryptContact } from "@/lib/field-crypto";
+import { PHOTO_BUCKET, signedLinks } from "@/lib/storage";
+import PhotoManager, { type PhotoView } from "./PhotoManager";
 
 // Quick descriptions of the info we pull in. A Job is its ID, business, customer, assigned technician, status, description and creation date.
 type Job = {
@@ -235,6 +237,32 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
     decline_reason: string | null;
     decline_note: string | null;
   }[];
+
+  // Photos on these change orders (migration 013). The rows come through the usual company lock;
+  // the pictures themselves are private, so we make short-lived links to show them.
+  const { data: photoData, error: photoError } =
+    changeOrderIds.length > 0
+      ? await supabase
+          .from("change_order_photos")
+          .select("id, change_order_id, storage_path")
+          .eq("business_id", job.business_id)
+          .in("change_order_id", changeOrderIds)
+          .order("created_at", { ascending: true })
+      : { data: [], error: null };
+  if (photoError) {
+    throw new Error(
+      `Could not load photos (has migration 013_photos_and_signatures.sql been applied?): ${photoError.message}`,
+    );
+  }
+  const photoRows = (photoData ?? []) as { id: string; change_order_id: string; storage_path: string }[];
+  const photoLinks = await signedLinks(
+    PHOTO_BUCKET,
+    photoRows.map((photo) => photo.storage_path),
+  );
+  const photosFor = (changeOrderId: string): PhotoView[] =>
+    photoRows
+      .filter((photo) => photo.change_order_id === changeOrderId)
+      .map((photo) => ({ id: photo.id, url: photoLinks.get(photo.storage_path) ?? null }));
 
   // A safety check: each change order's saved total should match the sum of its lines. If it doesn't, we stop instead of showing money that's wrong.
   const changeOrderLines = changeOrderLineData as ChangeOrderLine[];
@@ -517,6 +545,11 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                       />
                     </div>
                     {/* Why the customer declined, if they said. */}
+                    <PhotoManager
+                      changeOrderId={changeOrder.id}
+                      editable={changeOrder.status === "draft"}
+                      photos={photosFor(changeOrder.id)}
+                    />
                     {(() => {
                       const decline = declines.find((d) => d.change_order_id === changeOrder.id);
                       const label = declineReasonLabel(decline?.decline_reason);

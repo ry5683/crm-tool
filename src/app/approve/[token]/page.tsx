@@ -9,6 +9,7 @@ import { hashApprovalToken, isValidApprovalToken } from "@/lib/approval-token";
 import { createClient } from "@/lib/supabase/server";
 import { connection } from "next/server";
 import DecisionForm from "./DecisionForm";
+import { PHOTO_BUCKET, signedLinks } from "@/lib/storage";
 
 // One line of work as the database hands it over (quantity in thousandths, price in cents).
 type ApprovalLine = {
@@ -26,6 +27,7 @@ type PublicApproval = {
   reason?: string;
   total_cents?: number;
   lines?: ApprovalLine[];
+  photos?: string[];
   decision?: "approved" | "declined";
   approver_name?: string;
 };
@@ -135,6 +137,13 @@ export default async function ApprovalPage({ params }: ApprovalPageProps) {
   }
 
   // Everything checks out, so draw the full approval page: business, reason, work and total, then the decision form.
+  // Only this page's own server can turn the private photo locations into viewable links.
+  const photoPaths = (approval.photos ?? []).filter((path) => typeof path === "string");
+  const photoLinks = await signedLinks(PHOTO_BUCKET, photoPaths);
+  const photoUrls = photoPaths
+    .map((path) => photoLinks.get(path))
+    .filter((url): url is string => Boolean(url));
+
   return (
     <main className="animate-rise min-h-screen bg-zinc-50 px-4 py-12">
       <article className="mx-auto max-w-2xl rounded-xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
@@ -172,7 +181,31 @@ export default async function ApprovalPage({ params }: ApprovalPageProps) {
             }))}
             totalLabel="Change-order total"
           />
+          {/* Totals here are before tax, so the customer isn't surprised by the invoice. */}
+          <p className="mt-3 text-sm text-zinc-600">
+            Prices shown before sales tax. Any tax on taxable items is added on your invoice.
+          </p>
         </section>
+        {/* Photos the plumber took, shown through links that expire after a few minutes. */}
+        {photoUrls.length > 0 && (
+          <section className="mt-8">
+            <h2 className="mb-3 text-lg font-semibold text-zinc-950">Photos</h2>
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {photoUrls.map((url, index) => (
+                <li key={url}>
+                  <a href={url} rel="noreferrer" target="_blank">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- short-lived private links can't go through Next's image optimizer */}
+                    <img
+                      alt={`Photo ${index + 1} of the work`}
+                      className="aspect-square w-full rounded-lg border border-zinc-200 object-cover"
+                      src={url}
+                    />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
         {/* The Approve / Decline form, which gets the secret code passed along. */}
         <DecisionForm token={token} />
       </article>

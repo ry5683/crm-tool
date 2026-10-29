@@ -6,7 +6,7 @@ import { connection } from "next/server";
 import type { CSSProperties } from "react";
 import AnimatedMoney from "@/components/AnimatedMoney";
 import { invoiceStatus, PAYMENT_TERMS_DAYS, type InvoiceStatus } from "@/lib/invoices";
-import { formatCents, totalCents } from "@/lib/money";
+import { formatCents, invoiceTotals } from "@/lib/money";
 import { requireSession } from "@/lib/session";
 import PaidButton from "./PaidButton";
 
@@ -15,10 +15,16 @@ type JobRow = {
   description: string;
   created_at: string;
   paid_at: string | null;
+  tax_rate_millipercent: number | null;
   customers: { name: string } | null;
 };
-type Line = { job_id: string; quantity_milli: number; unit_price_cents: number };
-type ChangeLine = { change_order_id: string; quantity_milli: number; unit_price_cents: number };
+type Line = { job_id: string; quantity_milli: number; unit_price_cents: number; taxable: boolean };
+type ChangeLine = {
+  change_order_id: string;
+  quantity_milli: number;
+  unit_price_cents: number;
+  taxable: boolean;
+};
 
 type InvoicesPageProps = { searchParams: Promise<{ status?: string }> };
 
@@ -41,16 +47,17 @@ const filters = [
 export default async function InvoicesPage({ searchParams }: InvoicesPageProps) {
   await connection();
   const { status: statusParam = "all" } = await searchParams;
-  const { supabase, role } = await requireSession();
+  const { supabase, role, businessId } = await requireSession();
 
   // Jobs (with the customer's name), all estimate lines, and the approved change orders.
-  const [jobResult, estimateResult, changeOrderResult] = await Promise.all([
+  const [jobResult, estimateResult, changeOrderResult, businessResult] = await Promise.all([
     supabase
       .from("jobs")
-      .select("id, description, created_at, paid_at, customers(name)")
+      .select("id, description, created_at, paid_at, tax_rate_millipercent, customers(name)")
       .order("created_at", { ascending: false }),
-    supabase.from("estimate_lines").select("job_id, quantity_milli, unit_price_cents"),
+    supabase.from("estimate_lines").select("job_id, quantity_milli, unit_price_cents, taxable"),
     supabase.from("change_orders").select("id, job_id").eq("status", "approved"),
+    supabase.from("businesses").select("tax_rate_millipercent").eq("id", businessId).maybeSingle(),
   ]);
   if (jobResult.error) {
     // The most likely cause: migration 009 hasn't been applied yet.
@@ -66,7 +73,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
     changeOrders.length > 0
       ? await supabase
           .from("change_order_lines")
-          .select("change_order_id, quantity_milli, unit_price_cents")
+          .select("change_order_id, quantity_milli, unit_price_cents, taxable")
           .in("change_order_id", changeOrders.map((changeOrder) => changeOrder.id))
       : { data: [] as ChangeLine[], error: null };
   if (changeLineResult.error) {
@@ -75,10 +82,20 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
 
   // Gather every billable line under its job.
   const jobByChangeOrder = new Map(changeOrders.map((changeOrder) => [changeOrder.id, changeOrder.job_id]));
-  const linesByJob = new Map<string, Array<{ quantityMilli: number; unitPriceCents: number }>>();
-  const addLine = (jobId: string, line: { quantity_milli: number; unit_price_cents: number }) => {
+  const linesByJob = new Map<
+    string,
+    Array<{ quantityMilli: number; unitPriceCents: number; taxable: boolean }>
+  >();
+  const addLine = (
+    jobId: string,
+    line: { quantity_milli: number; unit_price_cents: number; taxable: boolean },
+  ) => {
     const list = linesByJob.get(jobId) ?? [];
-    list.push({ quantityMilli: line.quantity_milli, unitPriceCents: line.unit_price_cents });
+    list.push({
+      quantityMilli: line.quantity_milli,
+      unitPriceCents: line.unit_price_cents,
+      taxable: line.taxable,
+    });
     linesByJob.set(jobId, list);
   };
   for (const line of estimateResult.data as Line[]) addLine(line.job_id, line);
@@ -87,11 +104,23 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
     if (jobId) addLine(jobId, line);
   }
 
+  if (businessResult.error) {
+    throw new Error(
+      `Could not load the tax rate (has migration 012_sales_tax.sql been applied?): ${businessResult.error.message}`,
+    );
+  }
+  const businessTaxRate =
+    (businessResult.data as { tax_rate_millipercent: number } | null)?.tax_rate_millipercent ?? 0;
+
   const now = new Date();
   const invoices = (jobResult.data as unknown as JobRow[])
     .map((job) => ({
       job,
-      total: totalCents(linesByJob.get(job.id) ?? []),
+      // Totals include sales tax. A paid job keeps the rate it was paid at.
+      total: invoiceTotals(
+        linesByJob.get(job.id) ?? [],
+        job.tax_rate_millipercent ?? businessTaxRate,
+      ).totalCents,
       status: invoiceStatus(job.paid_at, job.created_at, now),
     }))
     // A job with nothing on it has nothing to bill.

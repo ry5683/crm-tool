@@ -54,3 +54,11 @@ describe("decline reasons", () => {
     assert.match(declineNoteError("too_expensive", "x".repeat(301)) ?? "", /300/);
   });
 });
+
+describe("signature decision response", () => {
+  it("asks the customer to sign when the database says a signature is required", () => {
+    const response = decisionResponse("signature_required");
+    assert.equal(response.status, 400);
+    assert.equal(response.body.status, "signature_required");
+  });
+});

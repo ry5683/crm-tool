@@ -45,6 +45,8 @@ const updateJobInputSchema = z.object({
           .max(2_147_483_000)
           .refine((quantity) => quantity % 1_000 === 0, "Quantity must be a whole number."),
         unitPriceCents: z.number().int().positive().max(2_147_483_647),
+        // Sales tax applies to this line (missing = yes, so older forms still work).
+        taxable: z.boolean().default(true),
       }),
     )
     .min(1, "Add at least one estimate line."),
@@ -140,6 +142,7 @@ export async function updateJob(
       description: line.description,
       quantity_milli: line.quantityMilli,
       unit_price_cents: line.unitPriceCents,
+      taxable: line.taxable,
     })),
   });
 

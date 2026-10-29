@@ -9,11 +9,21 @@ const nextConfig: NextConfig = {
   // Browser-side protections: force HTTPS, block framing/sniffing, and limit what pages can load or send.
   async headers() {
     const isDev = process.env.NODE_ENV !== "production";
+    // Photos and signatures load from Supabase storage through short-lived links (migration 013),
+    // so pictures from your Supabase project's address are allowed too, and nothing else.
+    let supabaseOrigin = "";
+    try {
+      supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL
+        ? ` ${new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin}`
+        : "";
+    } catch {
+      supabaseOrigin = "";
+    }
     const csp = [
       "default-src 'self'",
       `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob:",
+      `img-src 'self' data: blob:${supabaseOrigin}`,
       "font-src 'self' data:",
       `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
       "frame-ancestors 'none'",

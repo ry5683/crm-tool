@@ -17,6 +17,7 @@ type PricebookItem = {
   name: string;
   unit: string;
   price_cents: number;
+  taxable: boolean;
 };
 
 // Next.js setting: build this page fresh each visit.
@@ -61,11 +62,26 @@ export default async function PricebookPage() {
 
   // Now load that business's items, sorted by name.
   const membership = membershipData as Membership;
-  const { data, error } = await supabase
-    .from("pricebook_items")
-    .select("id, name, unit, price_cents")
-    .eq("business_id", membership.business_id)
-    .order("name", { ascending: true });
+  const [{ data, error }, { data: businessData, error: businessError }] = await Promise.all([
+    supabase
+      .from("pricebook_items")
+      .select("id, name, unit, price_cents, taxable")
+      .eq("business_id", membership.business_id)
+      .order("name", { ascending: true }),
+    // The business's sales tax rate (migration 012), shown and edited at the top of this page.
+    supabase
+      .from("businesses")
+      .select("tax_rate_millipercent")
+      .eq("id", membership.business_id)
+      .maybeSingle(),
+  ]);
+  if (businessError) {
+    throw new Error(
+      `Could not load the tax rate (has migration 012_sales_tax.sql been applied?): ${businessError.message}`,
+    );
+  }
+  const taxRateMilliPercent =
+    (businessData as { tax_rate_millipercent: number } | null)?.tax_rate_millipercent ?? 0;
 
   // If loading failed, stop with a clear message.
   if (error) {
@@ -101,6 +117,7 @@ export default async function PricebookPage() {
         <PricebookManager
           canEdit={membership.role === "owner"}
           items={data as PricebookItem[]}
+          taxRateMilliPercent={taxRateMilliPercent}
         />
       </div>
     </main>

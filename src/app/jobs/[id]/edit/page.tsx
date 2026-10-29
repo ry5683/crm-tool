@@ -37,6 +37,7 @@ type EstimateLine = {
   description: string;
   quantity_milli: number;
   unit_price_cents: number;
+  taxable: boolean;
 };
 
 // The job's ID, which comes from the web address.
@@ -98,7 +99,7 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
         .eq("role", "tech"),
       supabase
         .from("estimate_lines")
-        .select("id, description, quantity_milli, unit_price_cents")
+        .select("id, description, quantity_milli, unit_price_cents, taxable")
         .eq("business_id", job.business_id)
         .eq("job_id", job.id)
         .order("created_at", { ascending: true }),
@@ -155,6 +156,7 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
               description: line.description,
               quantity: quantityValueFromMilli(line.quantity_milli),
               unitPrice: (line.unit_price_cents / 100).toFixed(2),
+              taxable: line.taxable,
             })),
           }}
           technicians={(memberData as Member[]).map((member) => ({
