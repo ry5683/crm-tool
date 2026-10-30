@@ -117,3 +117,13 @@
 - Tested: 26 unit tests pass (new image checks + signature response); 001–013 on a local Postgres copy: 6-photo limit, frozen after send, other company blocked, approve without signature refused, decline with signature refused. TypeScript and ESLint pass.
 - Not covered: photo files of a deleted draft job stay in storage (private, harmless). Try it on a real phone: camera upload and signing with a finger.
 - Next: apply 012 and 013 in Supabase, test on a phone, then the go-live checklist.
+
+## 2026-10-29: New Supabase project + techs see only their own jobs
+- Moved to a new Supabase project (Tinkr). Ran 002–013 in the SQL editor (001 was already there); each is saved there under its file name.
+- Rewrote `supabase/seed.sql`: 12 fake companies, 4–10 jobs each; it now creates the sample logins itself (no password). The shared test password is set by the `seed_test_passwords` query in Supabase and kept in `.env.test-logins` (gitignored).
+- Built: `supabase/migrations/014_tech_sees_own_jobs.sql`. Owners see every job; a tech sees only jobs assigned to them, plus those jobs' estimate lines, change orders, approvals and photos. A tech's new or edited job is assigned to them automatically (database trigger), so they can't lock themselves out or hand a job off. Customers, price list and team stay shared. Guards stop the saved routines from reaching a job the person can't see.
+- App: techs no longer see the technician picker (new and edit job), the server actions save the tech as the assignee, and the jobs list says "My jobs" for techs.
+- Tested: `supabase/tests/014_tech_sees_own_jobs_test.sql` (also saved in Supabase) acts as a Harbor tech and owner; all checks passed. tsc and ESLint pass.
+- Still to do: point `.env.local` at the new project (URL, publishable key, service role key); run `npm test` on the Mac; click through as `harbor.tech@example.com` and `harbor.owner@example.com`.
+- Understand well enough to explain: (fill in)
+- Still fuzzy: (fill in)

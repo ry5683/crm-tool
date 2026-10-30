@@ -53,7 +53,7 @@ export default async function NewJobPage({
   // Find which plumbing business you belong to.
   const { data: memberships, error: membershipError } = await supabase
     .from("members")
-    .select("business_id")
+    .select("business_id, role")
     .eq("user_id", userId)
     .order("created_at", { ascending: true })
     .limit(1);
@@ -63,8 +63,9 @@ export default async function NewJobPage({
   }
 
   // Use the first one we find. If you don't belong to any, we stop with an error.
-  const membershipRows = memberships as Array<{ business_id: string }>;
+  const membershipRows = memberships as Array<{ business_id: string; role: string }>;
   const businessId = membershipRows[0]?.business_id;
+  const isOwner = membershipRows[0]?.role === "owner";
   if (!businessId) {
     throw new Error("Your account is not linked to a plumbing business.");
   }
@@ -115,6 +116,7 @@ export default async function NewJobPage({
         {/* The form itself. We hand it the save function, the customers and the technicians to choose from. */}
         <JobForm
           action={createJob}
+          canAssign={isOwner}
           customers={customerData as Customer[]}
           defaultCustomerId={
             (customerData as Customer[]).some((c) => c.id === preselectedCustomerId)

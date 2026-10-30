@@ -151,7 +151,8 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
               <Brand />
             </div>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
-              Jobs
+              {/* Owners see every job in the business; techs only see the ones assigned to them (014). */}
+              {ownedBusinessIds.size > 0 ? "Jobs" : "My jobs"}
             </h1>
           </div>
           <div className="hidden md:block">
@@ -177,7 +178,9 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
               <p className="mt-1 text-sm text-zinc-600">
                 {requestedJobId
                   ? "No job with that ID is available to this account."
-                  : "Create your first job and it will show up right here."}
+                  : ownedBusinessIds.size > 0
+                    ? "Create your first job and it will show up right here."
+                    : "Jobs assigned to you, and jobs you create, will show up right here."}
               </p>
               {!requestedJobId && (
                 <Link

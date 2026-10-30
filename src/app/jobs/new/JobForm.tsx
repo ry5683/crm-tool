@@ -61,6 +61,7 @@ export default function JobForm({
   technicians,
   initial,
   defaultCustomerId,
+  canAssign = true,
 }: {
   action: (
     previousState: CreateJobState,
@@ -70,6 +71,8 @@ export default function JobForm({
   technicians: TechnicianOption[];
   initial?: InitialJob;
   defaultCustomerId?: string;
+  // Owners pick who does the job. Techs can't: their jobs are always assigned to themselves (the database enforces this, see 014).
+  canAssign?: boolean;
 }) {
   // Are we editing an existing job or making a new one? We also track the save result and whether a save is in progress.
   const isEditing = initial !== undefined;
@@ -317,7 +320,8 @@ export default function JobForm({
           />
         </div>
 
-        {/* Optionally pick a technician to take the job. */}
+        {/* Owners can optionally pick a technician to take the job. Techs just see that it's theirs. */}
+        {canAssign ? (
         <div>
           <label
             className="mb-2 block text-sm font-medium text-zinc-800"
@@ -339,6 +343,11 @@ export default function JobForm({
             ))}
           </select>
         </div>
+        ) : (
+          <p className="rounded-lg bg-zinc-50 px-3 py-2.5 text-sm text-zinc-600">
+            This job will be assigned to you.
+          </p>
+        )}
       </section>
 
       {/* Box two: the original estimate, built from lines. */}

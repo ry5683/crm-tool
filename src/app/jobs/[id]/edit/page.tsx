@@ -116,6 +116,18 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
     throw new Error(`Could not load estimate lines: ${lineError.message}`);
   }
 
+  // Are you an owner of this job's business? Only owners can reassign a job.
+  const { data: myMembership, error: roleError } = await supabase
+    .from("members")
+    .select("role")
+    .eq("business_id", job.business_id)
+    .eq("user_id", claims.claims.sub)
+    .maybeSingle();
+  if (roleError) {
+    throw new Error(`Could not check your role: ${roleError.message}`);
+  }
+  const isOwner = (myMembership as { role: string } | null)?.role === "owner";
+
   // Make sure the job's customer is in the list we loaded. If it isn't, something's off, so we show "not found".
   const customers = (customerData as Customer[]).map(decryptContact);
   const estimateLines = lineData as EstimateLine[];
@@ -146,6 +158,7 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
         {/* The same job form, filled in with this job's current info. Prices go from cents back into dollars so they read normally. */}
         <JobForm
           action={updateJob}
+          canAssign={isOwner}
           customers={customers}
           initial={{
             jobId: job.id,

@@ -148,7 +148,7 @@ export async function createJob(
   // Find out which plumbing business you work for, since the job has to be filed under one.
   const { data: memberships, error: membershipError } = await supabase
     .from("members")
-    .select("business_id")
+    .select("business_id, role")
     .eq("user_id", userId)
     .order("created_at", { ascending: true })
     .limit(1);
@@ -158,8 +158,11 @@ export async function createJob(
   }
 
   // Use the first business we find. If there isn't one, we tell you to ask an owner for help.
-  const membershipRows = memberships as Array<{ business_id: string }>;
+  const membershipRows = memberships as Array<{ business_id: string; role: string }>;
   const businessId = membershipRows[0]?.business_id;
+  // Owners can assign anyone (or nobody). A tech's new job is always theirs, so they can still see it after saving.
+  // The database does the same thing on its own (014); doing it here too keeps the app honest about what will happen.
+  const techIdToSave = membershipRows[0]?.role === "owner" ? normalizedTechId : userId;
   if (!businessId) {
     return {
       error: "Your account is not linked to a plumbing business. Ask an owner for help.",
@@ -177,7 +180,7 @@ export async function createJob(
       p_new_customer_phone: encryptField(newCustomer?.phone || null, "customer.phone"),
       p_new_customer_address: encryptField(newCustomer?.address || null, "customer.address"),
       p_job_description: jobResult.data.description,
-      p_assigned_tech_id: normalizedTechId,
+      p_assigned_tech_id: techIdToSave,
       p_estimate_lines: jobResult.data.estimateLines.map((line) => ({
         description: line.description,
         quantity_milli: line.quantityMilli,

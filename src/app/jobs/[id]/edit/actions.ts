@@ -128,6 +128,20 @@ export async function updateJob(
     redirect("/login");
   }
 
+  // Owners can reassign the job. A tech's job stays assigned to them (the database enforces this too, see 014).
+  const userId = claims.claims.sub;
+  const { data: myMemberships, error: roleError } = await supabase
+    .from("members")
+    .select("role")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true })
+    .limit(1);
+  if (roleError) {
+    return { error: `Could not check your role: ${roleError.message}` };
+  }
+  const isOwner = (myMemberships as Array<{ role: string }>)[0]?.role === "owner";
+  const techIdToSave = isOwner ? normalizedTechId : userId;
+
   // Save the customer, job and estimate lines together in one go, so nothing ends up half saved. If you're not allowed to edit this job, the database says no and we pass that along.
   const { error } = await supabase.rpc("update_job_with_estimate", {
     p_job_id: parsed.data.jobId,
@@ -137,7 +151,7 @@ export async function updateJob(
     p_customer_phone: encryptField(customerResult.data.phone ?? null, "customer.phone"),
     p_customer_address: encryptField(customerResult.data.address ?? null, "customer.address"),
     p_job_description: parsed.data.description,
-    p_assigned_tech_id: normalizedTechId,
+    p_assigned_tech_id: techIdToSave,
     p_estimate_lines: parsed.data.estimateLines.map((line) => ({
       description: line.description,
       quantity_milli: line.quantityMilli,
